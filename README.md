@@ -1,5 +1,5 @@
 # Repositório POO 25/26
 
-- Nº Aluno 1 - Nome Aluno 1 (a preencher)
-- Nº Aluno 2 - Nome Aluno 2 (a preencher)
-- Nº Aluno 3 - Nome Aluno 3 (a preencher)
+João Pedro Cunha Cerqueira - A111753 - Cerqueira4618
+Rafael Figueiras Esteves - A112032 - a112032
+Nuno Henrique Dias Pereira - A110067 - NHenriqueP
