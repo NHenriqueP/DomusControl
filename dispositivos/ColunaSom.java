@@ -1,3 +1,5 @@
+package dispositivos;
+
 public class ColunaSom extends Dispositivo {
     private int volume;
 

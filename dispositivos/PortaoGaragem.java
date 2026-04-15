@@ -1,3 +1,5 @@
+package dispositivos;
+
 public class PortaoGaragem extends Dispositivo {
     private int percentagemAbertura;
 
@@ -35,5 +37,29 @@ public class PortaoGaragem extends Dispositivo {
 
     public void fecharPortao() {
         this.percentagemAbertura = 0;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString());
+        sb.append(", Percentagem Abertura= ").append(this.percentagemAbertura).append("%");
+        return sb.toString().replace("]", "") + "]";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        
+        if (o == null || this.getClass() != o.getClass()) return false;
+        
+        PortaoGaragem portao = (PortaoGaragem) o;
+        
+        return this.percentagemAbertura == portao.getPercentagemAbertura();
+    }
+
+    @Override
+    public Dispositivo clone() {
+        return new PortaoGaragem(this);
     }
 }

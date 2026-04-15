@@ -1,3 +1,5 @@
+package dispositivos;
+
 public class Cortina extends Dispositivo {
     private int percentagemAbertura;
 
@@ -35,5 +37,29 @@ public class Cortina extends Dispositivo {
 
     public void fecharCortina() {
         this.percentagemAbertura = 0;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString());
+        sb.append(", Percentagem Abertura= ").append(this.percentagemAbertura).append("%");
+        return sb.toString().replace("]", "") + "]";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        
+        if (o == null || this.getClass() != o.getClass()) return false;
+        
+        Cortina cortina = (Cortina) o;
+        
+        return this.percentagemAbertura == cortina.getPercentagemAbertura();
+    }
+
+    @Override
+    public Dispositivo clone() {
+        return new Cortina(this);
     }
 }

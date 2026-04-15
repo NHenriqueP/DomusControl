@@ -1,3 +1,5 @@
+package dispositivos;
+
 public class Lampada extends Dispositivo {
     private int intensidade;
     private boolean suportaCor;
@@ -68,5 +70,33 @@ public class Lampada extends Dispositivo {
         }
 
         this.temperaturaCor = temperaturaCor;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString());
+        sb.append(", Intensidade= ").append(this.intensidade);
+        sb.append(", Suporta Cor= ").append(this.suportaCor);
+        sb.append(", Temperatura Cor= ").append(this.temperaturaCor).append("K");
+        return sb.toString().replace("]", "") + "]";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        
+        if (o == null || this.getClass() != o.getClass()) return false;
+        
+        Lampada lampada = (Lampada) o;
+        
+        return this.intensidade == lampada.getIntensidade() &&
+               this.suportaCor == lampada.getSuportaCor() &&
+               this.temperaturaCor == lampada.getTemperaturaCor();
+    }
+
+    @Override
+    public Dispositivo clone() {
+        return new Lampada(this);
     }
 }
