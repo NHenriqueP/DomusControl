@@ -1,5 +1,6 @@
 package casas;
 
+import automacoes.Automacao;
 import dispositivos.Dispositivo;
 
 import java.util.HashMap;

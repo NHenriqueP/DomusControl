@@ -1,4 +1,6 @@
-package casas;
+package automacoes;
+
+import casas.Casa;
 
 import java.util.Objects;
 import java.util.UUID;
