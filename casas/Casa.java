@@ -5,13 +5,16 @@ import dispositivos.Dispositivo;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
 public class Casa {
+    private String idCasa;
     private String nomeProprietario;
     private int codigoPostal;
     private String fornecedorEnergia;
+    private Map<String, TipoAcessoCasa> acessosUtilizadores;
     
     // Mapeia o ID do dispositivo para o objeto Dispositivo em si
     private Map<String, Dispositivo> dispositivos;
@@ -21,31 +24,45 @@ public class Casa {
 
 
     public Casa() {
+        this.idCasa = UUID.randomUUID().toString();
         this.nomeProprietario = "";
         this.codigoPostal = 0;
         this.fornecedorEnergia = "";
+        this.acessosUtilizadores = new HashMap<>();
         this.dispositivos = new HashMap<>();
         this.divisoes = new HashMap<>();
     }
 
     public Casa(String nomeProprietario, int codigoPostal, String fornecedorEnergia) {
+        this.idCasa = UUID.randomUUID().toString();
         this.nomeProprietario = nomeProprietario;
         this.codigoPostal = codigoPostal;
         this.fornecedorEnergia = fornecedorEnergia;
+        this.acessosUtilizadores = new HashMap<>();
         this.dispositivos = new HashMap<>();
         this.divisoes = new HashMap<>();
     }
 
 
     public Casa(Casa umaCasa) {
+        this.idCasa = umaCasa.getIdCasa();
         this.nomeProprietario = umaCasa.getNomeProprietario();
         this.codigoPostal = umaCasa.getCodigoPostal();
         this.fornecedorEnergia = umaCasa.getFornecedorEnergia();
+        this.acessosUtilizadores = umaCasa.getAcessosUtilizadores();
         this.dispositivos = umaCasa.getDispositivos();
         this.divisoes = umaCasa.getDivisoes();
     }
 
 
+
+    public String getIdCasa() {
+        return idCasa;
+    }
+
+    public void setIdCasa(String idCasa) {
+        this.idCasa = idCasa;
+    }
 
     public String getNomeProprietario() {
         return nomeProprietario;
@@ -69,6 +86,14 @@ public class Casa {
 
     public void setFornecedorEnergia(String fornecedorEnergia) {
         this.fornecedorEnergia = fornecedorEnergia;
+    }
+
+    public Map<String, TipoAcessoCasa> getAcessosUtilizadores() {
+        return new HashMap<>(this.acessosUtilizadores);
+    }
+
+    public void setAcessosUtilizadores(Map<String, TipoAcessoCasa> acessosUtilizadores) {
+        this.acessosUtilizadores = new HashMap<>(acessosUtilizadores);
     }
 
 
@@ -105,6 +130,11 @@ public class Casa {
         this.divisoes.putIfAbsent(nomeDivisao, new Divisao(nomeDivisao));
     }
 
+    public void addDivisao(Utilizador utilizador, String nomeDivisao) {
+        validarAdministrador(utilizador);
+        addDivisao(nomeDivisao);
+    }
+
 
     public void addDispositivo(Dispositivo d, String nomeDivisao) {
         if (!this.divisoes.containsKey(nomeDivisao)) {
@@ -112,6 +142,40 @@ public class Casa {
         }
         this.dispositivos.put(d.getId(), d);
         this.divisoes.get(nomeDivisao).addDispositivo(d.getId());
+    }
+
+    public void addDispositivo(Utilizador utilizador, Dispositivo d, String nomeDivisao) {
+        validarAdministrador(utilizador);
+        addDispositivo(d, nomeDivisao);
+    }
+
+    public void atribuirAcesso(Utilizador utilizador, TipoAcessoCasa tipoAcesso) {
+        this.acessosUtilizadores.put(utilizador.getEmail(), tipoAcesso);
+        utilizador.registarAcessoCasa(this.idCasa, tipoAcesso);
+    }
+
+    public boolean temAcesso(Utilizador utilizador) {
+        return this.acessosUtilizadores.containsKey(utilizador.getEmail());
+    }
+
+    public boolean isAdministrador(Utilizador utilizador) {
+        return this.acessosUtilizadores.get(utilizador.getEmail()) == TipoAcessoCasa.ADMINISTRADOR;
+    }
+
+    public void ligarDispositivo(Utilizador utilizador, String idDispositivo) {
+        validarAcesso(utilizador);
+        Dispositivo d = this.dispositivos.get(idDispositivo);
+        if (d != null) {
+            d.ligarDispositivo();
+        }
+    }
+
+    public void desligarDispositivo(Utilizador utilizador, String idDispositivo) {
+        validarAcesso(utilizador);
+        Dispositivo d = this.dispositivos.get(idDispositivo);
+        if (d != null) {
+            d.desligarDispositivo();
+        }
     }
 
 
@@ -140,6 +204,18 @@ public class Casa {
         }
     }
 
+    private void validarAdministrador(Utilizador utilizador) {
+        if (!isAdministrador(utilizador)) {
+            throw new IllegalStateException("Operacao permitida apenas a administradores da casa.");
+        }
+    }
+
+    private void validarAcesso(Utilizador utilizador) {
+        if (!temAcesso(utilizador)) {
+            throw new IllegalStateException("Utilizador sem acesso a esta casa.");
+        }
+    }
+
 
 
     @Override
@@ -148,8 +224,10 @@ public class Casa {
         if (o == null || getClass() != o.getClass()) return false;
         Casa casa = (Casa) o;
         return codigoPostal == casa.codigoPostal &&
+            Objects.equals(idCasa, casa.idCasa) &&
                 Objects.equals(nomeProprietario, casa.nomeProprietario) &&
                 Objects.equals(fornecedorEnergia, casa.fornecedorEnergia) &&
+            Objects.equals(acessosUtilizadores, casa.acessosUtilizadores) &&
                 Objects.equals(dispositivos, casa.dispositivos) &&
                 Objects.equals(divisoes, casa.divisoes);
     }
@@ -162,9 +240,11 @@ public class Casa {
     @Override
     public String toString() {
         return "Casa{" +
+            "idCasa='" + idCasa + '\'' +
                 "Proprietário='" + nomeProprietario + '\'' +
                 ", CodigoPostal=" + codigoPostal +
                 ", Fornecedor='" + fornecedorEnergia + '\'' +
+            ", UtilizadoresComAcesso=" + acessosUtilizadores.size() +
                 ", Total Divisões=" + divisoes.size() +
                 ", Total Dispositivos=" + dispositivos.size() +
                 '}';
