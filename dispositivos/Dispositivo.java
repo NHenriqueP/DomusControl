@@ -76,4 +76,31 @@ public abstract class Dispositivo {
     public void desligarDispositivo() {
         this.estado = false;
     }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Dispositivo [ID= ").append(this.id);
+        sb.append(", Marca= ").append(this.marca);
+        sb.append(", Modelo= ").append(this.modelo);
+        sb.append(", Consumo Por Hora= ").append(this.consumoPorHora).append(" Wh");
+        sb.append(", Estado= ").append(this.estado ? "Ligado" : "Desligado");
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        
+        if (o == null || this.getClass() != o.getClass()) return false;
+        
+        Dispositivo d = (Dispositivo) o;
+        
+        return this.estado == d.getEstado() && 
+               this.consumoPorHora == d.getConsumoPorHora() &&
+               this.id.equals(d.getId()) && 
+               this.marca.equals(d.getMarca()) && 
+               this.modelo.equals(d.getModelo());
+    }
+
+    public abstract Dispositivo clone();
 }
