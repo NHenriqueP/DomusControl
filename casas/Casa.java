@@ -22,6 +22,9 @@ public class Casa {
     // Mapeia o nome da divisão para o objeto Divisao
     private Map<String, Divisao> divisoes;
 
+    // Mapeia o ID da automacao para o objeto Automacao
+    private Map<String, Automacao> automacoes;
+
 
     public Casa() {
         this.idCasa = UUID.randomUUID().toString();
@@ -31,6 +34,7 @@ public class Casa {
         this.acessosUtilizadores = new HashMap<>();
         this.dispositivos = new HashMap<>();
         this.divisoes = new HashMap<>();
+        this.automacoes = new HashMap<>();
     }
 
     public Casa(String nomeProprietario, int codigoPostal, String fornecedorEnergia) {
@@ -41,6 +45,7 @@ public class Casa {
         this.acessosUtilizadores = new HashMap<>();
         this.dispositivos = new HashMap<>();
         this.divisoes = new HashMap<>();
+        this.automacoes = new HashMap<>();
     }
 
 
@@ -52,6 +57,7 @@ public class Casa {
         this.acessosUtilizadores = umaCasa.getAcessosUtilizadores();
         this.dispositivos = umaCasa.getDispositivos();
         this.divisoes = umaCasa.getDivisoes();
+        this.automacoes = umaCasa.getAutomacoes();
     }
 
 
@@ -125,6 +131,21 @@ public class Casa {
         }
     }
 
+    public Map<String, Automacao> getAutomacoes() {
+        Map<String, Automacao> copia = new HashMap<>();
+        for (Map.Entry<String, Automacao> entry : this.automacoes.entrySet()) {
+            copia.put(entry.getKey(), entry.getValue().clone());
+        }
+        return copia;
+    }
+
+    public void setAutomacoes(Map<String, Automacao> automacoes) {
+        this.automacoes = new HashMap<>();
+        for (Map.Entry<String, Automacao> entry : automacoes.entrySet()) {
+            this.automacoes.put(entry.getKey(), entry.getValue().clone());
+        }
+    }
+
 
     public void addDivisao(String nomeDivisao) {
         this.divisoes.putIfAbsent(nomeDivisao, new Divisao(nomeDivisao));
@@ -147,6 +168,29 @@ public class Casa {
     public void addDispositivo(Utilizador utilizador, Dispositivo d, String nomeDivisao) {
         validarAdministrador(utilizador);
         addDispositivo(d, nomeDivisao);
+    }
+
+    public void associarAutomacao(Utilizador utilizador, Automacao automacao) {
+        validarAcesso(utilizador);
+        this.automacoes.put(automacao.getId(), automacao.clone());
+    }
+
+    public void removerAutomacao(Utilizador utilizador, String idAutomacao) {
+        validarAcesso(utilizador);
+        this.automacoes.remove(idAutomacao);
+    }
+
+    public void executarAutomacao(String idAutomacao) {
+        Automacao automacao = this.automacoes.get(idAutomacao);
+        if (automacao != null) {
+            automacao.executar(this);
+        }
+    }
+
+    public void executarAutomacoes() {
+        for (Automacao automacao : this.automacoes.values()) {
+            automacao.executar(this);
+        }
     }
 
     public void atribuirAcesso(Utilizador utilizador, TipoAcessoCasa tipoAcesso) {
@@ -229,7 +273,8 @@ public class Casa {
                 Objects.equals(fornecedorEnergia, casa.fornecedorEnergia) &&
             Objects.equals(acessosUtilizadores, casa.acessosUtilizadores) &&
                 Objects.equals(dispositivos, casa.dispositivos) &&
-                Objects.equals(divisoes, casa.divisoes);
+                Objects.equals(divisoes, casa.divisoes) &&
+                Objects.equals(automacoes, casa.automacoes);
     }
 
     @Override
@@ -247,6 +292,7 @@ public class Casa {
             ", UtilizadoresComAcesso=" + acessosUtilizadores.size() +
                 ", Total Divisões=" + divisoes.size() +
                 ", Total Dispositivos=" + dispositivos.size() +
+                ", Total Automacoes=" + automacoes.size() +
                 '}';
     }
 }
