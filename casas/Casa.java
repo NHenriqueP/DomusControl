@@ -1,0 +1,172 @@
+package casas;
+
+import dispositivos.Dispositivo;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+
+public class Casa {
+    private String nomeProprietario;
+    private int codigoPostal;
+    private String fornecedorEnergia;
+    
+    // Mapeia o ID do dispositivo para o objeto Dispositivo em si
+    private Map<String, Dispositivo> dispositivos;
+    
+    // Mapeia o nome da divisão para o objeto Divisao
+    private Map<String, Divisao> divisoes;
+
+
+    public Casa() {
+        this.nomeProprietario = "";
+        this.codigoPostal = 0;
+        this.fornecedorEnergia = "";
+        this.dispositivos = new HashMap<>();
+        this.divisoes = new HashMap<>();
+    }
+
+    public Casa(String nomeProprietario, int codigoPostal, String fornecedorEnergia) {
+        this.nomeProprietario = nomeProprietario;
+        this.codigoPostal = codigoPostal;
+        this.fornecedorEnergia = fornecedorEnergia;
+        this.dispositivos = new HashMap<>();
+        this.divisoes = new HashMap<>();
+    }
+
+
+    public Casa(Casa umaCasa) {
+        this.nomeProprietario = umaCasa.getNomeProprietario();
+        this.codigoPostal = umaCasa.getCodigoPostal();
+        this.fornecedorEnergia = umaCasa.getFornecedorEnergia();
+        this.dispositivos = umaCasa.getDispositivos();
+        this.divisoes = umaCasa.getDivisoes();
+    }
+
+
+
+    public String getNomeProprietario() {
+        return nomeProprietario;
+    }
+
+    public void setNomeProprietario(String nomeProprietario) {
+        this.nomeProprietario = nomeProprietario;
+    }
+
+    public int getCodigoPostal() {
+        return codigoPostal;
+    }
+
+    public void setCodigoPostal(int codigoPostal) {
+        this.codigoPostal = codigoPostal;
+    }
+
+    public String getFornecedorEnergia() {
+        return fornecedorEnergia;
+    }
+
+    public void setFornecedorEnergia(String fornecedorEnergia) {
+        this.fornecedorEnergia = fornecedorEnergia;
+    }
+
+
+    public Map<String, Dispositivo> getDispositivos() {
+        return this.dispositivos.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().clone()
+                ));
+    }
+
+    public void setDispositivos(Map<String, Dispositivo> dispositivos) {
+        this.dispositivos = new HashMap<>(dispositivos);
+    }
+
+
+    public Map<String, Divisao> getDivisoes() {
+        Map<String, Divisao> copia = new HashMap<>();
+        for (Map.Entry<String, Divisao> entry : this.divisoes.entrySet()) {
+            copia.put(entry.getKey(), entry.getValue().clone());
+        }
+        return copia;
+    }
+
+    public void setDivisoes(Map<String, Divisao> divisoes) {
+        this.divisoes = new HashMap<>();
+        for (Map.Entry<String, Divisao> entry : divisoes.entrySet()) {
+            this.divisoes.put(entry.getKey(), entry.getValue().clone());
+        }
+    }
+
+
+    public void addDivisao(String nomeDivisao) {
+        this.divisoes.putIfAbsent(nomeDivisao, new Divisao(nomeDivisao));
+    }
+
+
+    public void addDispositivo(Dispositivo d, String nomeDivisao) {
+        if (!this.divisoes.containsKey(nomeDivisao)) {
+            addDivisao(nomeDivisao);
+        }
+        this.dispositivos.put(d.getId(), d);
+        this.divisoes.get(nomeDivisao).addDispositivo(d.getId());
+    }
+
+
+    public void ligarDispositivosDivisao(String nomeDivisao) {
+        Divisao div = this.divisoes.get(nomeDivisao);
+        if (div != null) {
+            for (String id : div.getIdDispositivos()) {
+                Dispositivo d = this.dispositivos.get(id);
+                if (d != null) {
+                    d.ligarDispositivo();
+                }
+            }
+        }
+    }
+
+
+    public void desligarDispositivosDivisao(String nomeDivisao) {
+        Divisao div = this.divisoes.get(nomeDivisao);
+        if (div != null) {
+            for (String id : div.getIdDispositivos()) {
+                Dispositivo d = this.dispositivos.get(id);
+                if (d != null) {
+                    d.desligarDispositivo();
+                }
+            }
+        }
+    }
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Casa casa = (Casa) o;
+        return codigoPostal == casa.codigoPostal &&
+                Objects.equals(nomeProprietario, casa.nomeProprietario) &&
+                Objects.equals(fornecedorEnergia, casa.fornecedorEnergia) &&
+                Objects.equals(dispositivos, casa.dispositivos) &&
+                Objects.equals(divisoes, casa.divisoes);
+    }
+
+    @Override
+    public Casa clone() {
+        return new Casa(this);
+    }
+
+    @Override
+    public String toString() {
+        return "Casa{" +
+                "Proprietário='" + nomeProprietario + '\'' +
+                ", CodigoPostal=" + codigoPostal +
+                ", Fornecedor='" + fornecedorEnergia + '\'' +
+                ", Total Divisões=" + divisoes.size() +
+                ", Total Dispositivos=" + dispositivos.size() +
+                '}';
+    }
+}
