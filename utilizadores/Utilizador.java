@@ -1,10 +1,15 @@
-package casas;
+package utilizadores;
 
+import casas.TipoAcessoCasa;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class Utilizador {
+public class Utilizador implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String nome;
     private String email;
     private Map<String, TipoAcessoCasa> acessosCasas;

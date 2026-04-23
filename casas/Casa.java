@@ -2,7 +2,9 @@ package casas;
 
 import automacoes.Automacao;
 import dispositivos.Dispositivo;
+import utilizadores.Utilizador;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -10,7 +12,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 
-public class Casa {
+public class Casa implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String idCasa;
     private String nomeProprietario;
     private int codigoPostal;

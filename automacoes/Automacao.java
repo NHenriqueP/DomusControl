@@ -2,10 +2,13 @@ package automacoes;
 
 import casas.Casa;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-public class Automacao {
+public class Automacao implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private static final CondicaoAutomacao CONDICAO_FALSA = new CondicaoAutomacao() {
         @Override
         public boolean verificar(Casa casa) {

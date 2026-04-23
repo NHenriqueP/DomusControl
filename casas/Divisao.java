@@ -1,5 +1,6 @@
 package casas;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -7,7 +8,9 @@ import java.util.Objects;
 /**
  * Classe que representa uma Divisão genérica dentro de uma Casa.
  */
-public class Divisao {
+public class Divisao implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String nome;
     private List<String> idDispositivos; // Apenas guardamos os IDs por segurança
 

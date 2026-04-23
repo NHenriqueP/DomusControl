@@ -1,6 +1,10 @@
 package dispositivos;
 
-public abstract class Dispositivo {
+import java.io.Serializable;
+
+public abstract class Dispositivo implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String id;
     private String marca;
     private String modelo;
