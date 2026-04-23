@@ -111,9 +111,13 @@ public class TesteRequisitosBaseGestao {
         assertCondition(carregado.obterAtivacoesDispositivoCasa(idCasa, "RELE-1") >= 2,
             "leitura binaria preserva estatisticas de ativacao");
 
-        // 10) Criar duas automacoes e verificar ativacao
+        // 10) Criar cinco automacoes e verificar ativacao
+        dc.adicionarDispositivoACasa(idCasa, "henriqueta@domus.pt",
+            new Rele("RELE-SALA-2", "Shelly", "Plus1PM", 13.0, false), "Sala");
+
         dc.desligarDispositivo(idCasa, "nuna@domus.pt", "LAMP-1");
         dc.desligarDispositivo(idCasa, "nuna@domus.pt", "RELE-1");
+        dc.ligarDispositivo(idCasa, "nuna@domus.pt", "RELE-COZ-1");
 
         Automacao automacaoLigarLampada = new Automacao(
             "Auto ligar lampada",
@@ -129,28 +133,68 @@ public class TesteRequisitosBaseGestao {
             casa -> casa.ligarDispositivosDivisao("Sala")
         );
 
+        Automacao automacaoDesligarCozinha = new Automacao(
+            "Auto desligar cozinha",
+            "Desliga COZINHA se RELE-COZ-1 estiver ligado",
+            casa -> casa.getDispositivos().containsKey("RELE-COZ-1") && casa.getDispositivos().get("RELE-COZ-1").getEstado(),
+            casa -> casa.desligarDispositivosDivisao("Cozinha")
+        );
+
+        Automacao automacaoGarantirSalaLigada = new Automacao(
+            "Auto garantir sala",
+            "Mantem sala ligada",
+            casa -> true,
+            casa -> casa.ligarDispositivosDivisao("Sala")
+        );
+
+        Automacao automacaoGarantirQuartoLigado = new Automacao(
+            "Auto garantir quarto",
+            "Mantem quarto ligado",
+            casa -> true,
+            casa -> casa.ligarDispositivosDivisao("Quarto")
+        );
+
         dc.associarAutomacaoCasa(idCasa, "henriqueta@domus.pt", automacaoLigarLampada);
         dc.associarAutomacaoCasa(idCasa, "henriqueta@domus.pt", automacaoLigarRele);
+        dc.associarAutomacaoCasa(idCasa, "henriqueta@domus.pt", automacaoDesligarCozinha);
+        dc.associarAutomacaoCasa(idCasa, "henriqueta@domus.pt", automacaoGarantirSalaLigada);
+        dc.associarAutomacaoCasa(idCasa, "henriqueta@domus.pt", automacaoGarantirQuartoLigado);
         dc.executarAutomacoesCasa(idCasa);
 
+        assertCondition(dc.obterCasa(idCasa).getAutomacoes().size() == 5,
+            "total de 5 automacoes associado");
         assertCondition(dc.obterCasa(idCasa).getDispositivos().get("LAMP-1").getEstado(),
             "automacao 1 ativada");
         assertCondition(dc.obterCasa(idCasa).getDispositivos().get("RELE-1").getEstado(),
             "automacao 2 ativada");
+        assertCondition(!dc.obterCasa(idCasa).getDispositivos().get("RELE-COZ-1").getEstado(),
+            "automacao 3 ativada");
+        assertCondition(dc.obterCasa(idCasa).getDispositivos().get("RELE-SALA-2").getEstado(),
+            "automacao 4 ativada");
+        assertCondition(dc.obterCasa(idCasa).getDispositivos().get("LAMP-1").getEstado(),
+            "automacao 5 ativada");
 
-        // 11) Definir quatro escalonamentos e testar execucao
+        // 11) Definir sete escalonamentos e testar execucao
         LocalDateTime base = dc.getTempoAtual();
         dc.criarEscalonamento("Escalonamento 1", idCasa, base.plusHours(1), casa -> casa.ligarDispositivosDivisao("Sala"));
         dc.criarEscalonamento("Escalonamento 2", idCasa, base.plusHours(2), casa -> casa.desligarDispositivosDivisao("Sala"));
         dc.criarEscalonamento("Escalonamento 3", idCasa, base.plusHours(3), casa -> casa.ligarDispositivosDivisao("Quarto"));
         dc.criarEscalonamento("Escalonamento 4", idCasa, base.plusHours(4), casa -> casa.desligarDispositivosDivisao("Quarto"));
+        dc.criarEscalonamento("Escalonamento 5", idCasa, base.plusHours(5), casa -> casa.ligarDispositivosDivisao("Cozinha"));
+        dc.criarEscalonamento("Escalonamento 6", idCasa, base.plusHours(6), casa -> casa.desligarDispositivosDivisao("Cozinha"));
+        dc.criarEscalonamento("Escalonamento 7", idCasa, base.plusHours(7), casa -> casa.ligarDispositivosDivisao("Sala"));
 
-        dc.avancarHoras(5);
-        int totalExecutados = dc.executarEscalonamentosPendentes();
-        assertCondition(totalExecutados >= 4, "quatro escalonamentos executados");
+        int totalExecutados = 0;
+        for (int i = 1; i <= 7; i++) {
+            dc.avancarHoras(1);
+            int executadosNestaHora = dc.executarEscalonamentosPendentes();
+            assertCondition(executadosNestaHora == 1, "executou escalonamento " + i);
+            totalExecutados += executadosNestaHora;
+        }
+        assertCondition(totalExecutados == 7, "sete escalonamentos executados");
 
         String listaEscalonamentos = dc.listarEscalonamentos();
-        assertCondition(listaEscalonamentos.contains("Escalonamento 1") && listaEscalonamentos.contains("Executado: true"),
+        assertCondition(listaEscalonamentos.contains("Escalonamento 7") && listaEscalonamentos.contains("Executado: true"),
             "lista de escalonamentos atualizada");
 
         // 12) Criar e testar quatro cenarios
