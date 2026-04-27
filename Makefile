@@ -2,7 +2,7 @@ JC = javac
 JVM = java
 
 # Procura todos os ficheiros .java
-SOURCES = Main.java casas/*.java controlador/*.java dispositivos/*.java automacoes/*.java
+SOURCES = Main.java casas/*.java controlador/*.java dispositivos/*.java automacoes/*.java utilizadores/*.java
 
 .PHONY: all run clean
 

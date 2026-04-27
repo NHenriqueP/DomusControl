@@ -2,7 +2,7 @@ package dispositivos;
 
 import controlador.DomusControl;
 import casas.Casa;
-import casas.Utilizador;
+import utilizadores.Utilizador;
 import java.util.Scanner;
 import java.util.Map;
 
