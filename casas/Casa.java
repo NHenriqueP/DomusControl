@@ -293,6 +293,11 @@ public class Casa implements Serializable {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(idCasa, nomeProprietario, codigoPostal, fornecedorEnergia, acessosUtilizadores, dispositivos, divisoes, automacoes);
+    }
+
+    @Override
     public Casa clone() {
         return new Casa(this);
     }

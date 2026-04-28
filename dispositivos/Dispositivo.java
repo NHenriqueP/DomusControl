@@ -1,6 +1,7 @@
 package dispositivos;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public abstract class Dispositivo implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -94,18 +95,21 @@ public abstract class Dispositivo implements Serializable {
         return sb.toString();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        
         if (o == null || this.getClass() != o.getClass()) return false;
-        
         Dispositivo d = (Dispositivo) o;
-        
         return this.estado == d.getEstado() && 
-               this.consumoPorHora == d.getConsumoPorHora() &&
-               this.id.equals(d.getId()) && 
-               this.marca.equals(d.getMarca()) && 
-               this.modelo.equals(d.getModelo());
+               Double.compare(d.getConsumoPorHora(), this.consumoPorHora) == 0 &&
+               Objects.equals(this.id, d.getId()) && 
+               Objects.equals(this.marca, d.getMarca()) && 
+               Objects.equals(this.modelo, d.getModelo());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, marca, modelo, consumoPorHora, estado);
     }
 
     public abstract Dispositivo clone();

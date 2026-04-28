@@ -83,6 +83,11 @@ public class Utilizador implements Serializable {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(nome, email, acessosCasas);
+    }
+
+    @Override
     public Utilizador clone() {
         return new Utilizador(this);
     }

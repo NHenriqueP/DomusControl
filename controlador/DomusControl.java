@@ -5,7 +5,9 @@ import automacoes.Automacao;
 import casas.Casa;
 import casas.Divisao;
 import casas.TipoAcessoCasa;
+import cenarios.Cenario;
 import dispositivos.Dispositivo;
+import escalonamentos.Escalonamento;
 import utilizadores.Utilizador;
 
 import java.io.FileInputStream;
@@ -39,6 +41,7 @@ public class DomusControl implements Serializable {
     private Map<String, Double> horasUsoDispositivoCasa;
     private Map<String, LocalDateTime> instanteLigacaoDispositivoCasa;
     private List<Escalonamento> escalonamentos;
+    private Map<String, Cenario> cenarios;
 
     public DomusControl() {
         this.utilizadores = new HashMap<>();
@@ -49,6 +52,8 @@ public class DomusControl implements Serializable {
         this.horasUsoDispositivoCasa = new HashMap<>();
         this.instanteLigacaoDispositivoCasa = new HashMap<>();
         this.escalonamentos = new ArrayList<>();
+        this.cenarios = new HashMap<>();
+        inicializarCenariosBase();
     }
 
     public DomusControl(LocalDateTime tempoInicial) {
@@ -60,6 +65,8 @@ public class DomusControl implements Serializable {
         this.horasUsoDispositivoCasa = new HashMap<>();
         this.instanteLigacaoDispositivoCasa = new HashMap<>();
         this.escalonamentos = new ArrayList<>();
+        this.cenarios = new HashMap<>();
+        inicializarCenariosBase();
     }
 
     public DomusControl(DomusControl dc) {
@@ -80,7 +87,11 @@ public class DomusControl implements Serializable {
         this.instanteLigacaoDispositivoCasa = new HashMap<>(dc.instanteLigacaoDispositivoCasa);
         this.escalonamentos = new ArrayList<>();
         for (Escalonamento e : dc.escalonamentos) {
-            this.escalonamentos.add(e.copiar());
+            this.escalonamentos.add(e.clone());
+        }
+        this.cenarios = new HashMap<>();
+        for (Map.Entry<String, Cenario> entry : dc.cenarios.entrySet()) {
+            this.cenarios.put(entry.getKey(), entry.getValue().clone());
         }
     }
 
@@ -270,7 +281,7 @@ public class DomusControl implements Serializable {
         obterCasaOuErro(idCasa);
         Escalonamento escalonamento = new Escalonamento(nome, idCasa, instanteExecucao, acao);
         this.escalonamentos.add(escalonamento);
-        return escalonamento.id;
+        return escalonamento.getId();
     }
 
     public int executarEscalonamentosPendentes() {
@@ -278,7 +289,7 @@ public class DomusControl implements Serializable {
 
         for (Escalonamento escalonamento : this.escalonamentos) {
             if (escalonamento.deveExecutar(this.tempoAtual)) {
-                Casa casa = this.casas.get(escalonamento.idCasa);
+                Casa casa = this.casas.get(escalonamento.getIdCasa());
                 if (casa != null) {
                     escalonamento.executar(casa);
                     executados++;
@@ -287,6 +298,14 @@ public class DomusControl implements Serializable {
         }
 
         return executados;
+    }
+
+    public List<Escalonamento> obterEscalonamentos() {
+        List<Escalonamento> copia = new ArrayList<>();
+        for (Escalonamento e : this.escalonamentos) {
+            copia.add(e.clone());
+        }
+        return copia;
     }
 
     public String listarEscalonamentos() {
@@ -298,18 +317,46 @@ public class DomusControl implements Serializable {
         sb.append("Escalonamentos:\n");
         for (Escalonamento e : this.escalonamentos) {
             sb.append("- ")
-                .append(e.nome)
+                .append(e.getNome())
                 .append(" | Casa ")
-                .append(e.idCasa)
+                .append(e.getIdCasa())
                 .append(" | Instante ")
-                .append(e.instanteExecucao)
+                .append(e.getInstanteExecucao())
                 .append(" | Executado: ")
-                .append(e.executado)
+                .append(e.isExecutado())
                 .append("\n");
         }
         return sb.toString();
     }
 
+    // ============== Cenários ==============
+
+    public void criarCenario(Cenario cenario) {
+        this.cenarios.put(cenario.getId(), cenario.clone());
+    }
+
+    public void removerCenario(String idCenario) {
+        this.cenarios.remove(idCenario);
+    }
+
+    public Map<String, Cenario> obterCenarios() {
+        Map<String, Cenario> copia = new HashMap<>();
+        for (Map.Entry<String, Cenario> entry : this.cenarios.entrySet()) {
+            copia.put(entry.getKey(), entry.getValue().clone());
+        }
+        return copia;
+    }
+
+    public void aplicarCenario(String idCenario, String idCasa) {
+        Cenario cenario = this.cenarios.get(idCenario);
+        if (cenario == null) {
+            throw new IllegalArgumentException("Cenario inexistente: " + idCenario);
+        }
+        Casa casa = obterCasaOuErro(idCasa);
+        cenario.executar(casa);
+    }
+
+    // Mantém retrocompatibilidade com os 4 cenários exigidos pelo enunciado
     public void aplicarCenarioSairDeCasa(String idCasa) {
         Casa casa = obterCasaOuErro(idCasa);
         for (String divisao : casa.getDivisoes().keySet()) {
@@ -319,30 +366,50 @@ public class DomusControl implements Serializable {
 
     public void aplicarCenarioJantarComAmigos(String idCasa) {
         Casa casa = obterCasaOuErro(idCasa);
-
         for (String divisao : casa.getDivisoes().keySet()) {
             desligarDispositivosDivisao(idCasa, divisao);
         }
-
         ligarDivisaoSeExistir(casa, idCasa, "Sala");
         ligarDivisaoSeExistir(casa, idCasa, "Cozinha");
     }
 
     public void aplicarCenarioDeitar(String idCasa) {
         Casa casa = obterCasaOuErro(idCasa);
-
         for (String divisao : casa.getDivisoes().keySet()) {
             desligarDispositivosDivisao(idCasa, divisao);
         }
-
         ligarDivisaoSeExistir(casa, idCasa, "Quarto");
     }
 
     public void aplicarCenarioAcordar(String idCasa) {
         Casa casa = obterCasaOuErro(idCasa);
-
         ligarDivisaoSeExistir(casa, idCasa, "Quarto");
         ligarDivisaoSeExistir(casa, idCasa, "Cozinha");
+    }
+
+    private void inicializarCenariosBase() {
+        Cenario sairDeCasa = new Cenario("Sair de Casa", "Desliga todos os dispositivos");
+        sairDeCasa.adicionarAcao(casa -> casa.desligarDispositivosDivisao("Sala"));
+        sairDeCasa.adicionarAcao(casa -> casa.desligarDispositivosDivisao("Quarto"));
+        sairDeCasa.adicionarAcao(casa -> casa.desligarDispositivosDivisao("Cozinha"));
+        this.cenarios.put(sairDeCasa.getId(), sairDeCasa);
+
+        Cenario jantar = new Cenario("Jantar com Amigos", "Liga Sala e Cozinha, desliga o resto");
+        jantar.adicionarAcao(casa -> casa.desligarDispositivosDivisao("Quarto"));
+        jantar.adicionarAcao(casa -> casa.ligarDispositivosDivisao("Sala"));
+        jantar.adicionarAcao(casa -> casa.ligarDispositivosDivisao("Cozinha"));
+        this.cenarios.put(jantar.getId(), jantar);
+
+        Cenario deitar = new Cenario("Deitar", "Desliga tudo e liga o Quarto");
+        deitar.adicionarAcao(casa -> casa.desligarDispositivosDivisao("Sala"));
+        deitar.adicionarAcao(casa -> casa.desligarDispositivosDivisao("Cozinha"));
+        deitar.adicionarAcao(casa -> casa.ligarDispositivosDivisao("Quarto"));
+        this.cenarios.put(deitar.getId(), deitar);
+
+        Cenario acordar = new Cenario("Acordar", "Liga Quarto e Cozinha");
+        acordar.adicionarAcao(casa -> casa.ligarDispositivosDivisao("Quarto"));
+        acordar.adicionarAcao(casa -> casa.ligarDispositivosDivisao("Cozinha"));
+        this.cenarios.put(acordar.getId(), acordar);
     }
 
     public void registarUsoDispositivo(String idDispositivo) {
@@ -665,7 +732,8 @@ public class DomusControl implements Serializable {
                this.ativacoesDispositivoCasa.equals(that.ativacoesDispositivoCasa) &&
                this.horasUsoDispositivoCasa.equals(that.horasUsoDispositivoCasa) &&
                this.instanteLigacaoDispositivoCasa.equals(that.instanteLigacaoDispositivoCasa) &&
-               this.escalonamentos.equals(that.escalonamentos);
+               this.escalonamentos.equals(that.escalonamentos) &&
+               this.cenarios.equals(that.cenarios);
     }
 
     @Override
@@ -682,60 +750,6 @@ public class DomusControl implements Serializable {
             this.idCasa = idCasa;
             this.nomeDivisao = nomeDivisao;
             this.totalDispositivos = totalDispositivos;
-        }
-    }
-
-    private static class Escalonamento implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        private final String id;
-        private final String nome;
-        private final String idCasa;
-        private final LocalDateTime instanteExecucao;
-        private final AcaoAutomacao acao;
-        private boolean executado;
-
-        private Escalonamento(String nome, String idCasa, LocalDateTime instanteExecucao, AcaoAutomacao acao) {
-            this.id = UUID.randomUUID().toString();
-            this.nome = nome;
-            this.idCasa = idCasa;
-            this.instanteExecucao = instanteExecucao;
-            this.acao = acao;
-            this.executado = false;
-        }
-
-        private Escalonamento(Escalonamento other) {
-            this.id = other.id;
-            this.nome = other.nome;
-            this.idCasa = other.idCasa;
-            this.instanteExecucao = other.instanteExecucao;
-            this.acao = other.acao;
-            this.executado = other.executado;
-        }
-
-        private boolean deveExecutar(LocalDateTime tempoAtual) {
-            return !this.executado && !tempoAtual.isBefore(this.instanteExecucao);
-        }
-
-        private void executar(Casa casa) {
-            this.acao.executar(casa);
-            this.executado = true;
-        }
-
-        private Escalonamento copiar() {
-            return new Escalonamento(this);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Escalonamento that = (Escalonamento) o;
-            return executado == that.executado &&
-                id.equals(that.id) &&
-                nome.equals(that.nome) &&
-                idCasa.equals(that.idCasa) &&
-                instanteExecucao.equals(that.instanteExecucao);
         }
     }
 }
