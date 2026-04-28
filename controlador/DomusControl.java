@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class DomusControl implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -239,6 +240,19 @@ public class DomusControl implements Serializable {
                 registarDesligamento(idCasa, idDispositivo);
             }
         }
+    }
+
+    public void operarSobreDispositivo(String idCasa, String emailUtilizador, String idDispositivo,
+                                        Consumer<Dispositivo> operacao) {
+        Casa casa = obterCasaOuErro(idCasa);
+        Utilizador utilizador = obterUtilizadorOuErro(emailUtilizador);
+        casa.operarSobreDispositivo(utilizador, idDispositivo, operacao);
+    }
+
+    public Dispositivo obterDispositivoCasa(String idCasa, String idDispositivo) {
+        Casa casa = obterCasaOuErro(idCasa);
+        Dispositivo d = casa.getDispositivos().get(idDispositivo);
+        return d;
     }
 
     public void associarAutomacaoCasa(String idCasa, String emailUtilizador, Automacao automacao) {

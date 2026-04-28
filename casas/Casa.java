@@ -5,6 +5,7 @@ import dispositivos.Dispositivo;
 import utilizadores.Utilizador;
 
 import java.io.Serializable;
+import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -251,6 +252,15 @@ public class Casa implements Serializable {
                 }
             }
         }
+    }
+
+    public void operarSobreDispositivo(Utilizador utilizador, String idDispositivo, Consumer<Dispositivo> operacao) {
+        validarAcesso(utilizador);
+        Dispositivo d = this.dispositivos.get(idDispositivo);
+        if (d == null) {
+            throw new IllegalArgumentException("Dispositivo inexistente: " + idDispositivo);
+        }
+        operacao.accept(d);
     }
 
     private void validarAdministrador(Utilizador utilizador) {

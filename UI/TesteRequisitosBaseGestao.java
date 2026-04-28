@@ -1,3 +1,4 @@
+package UI;
 import automacoes.Automacao;
 import casas.TipoAcessoCasa;
 import controlador.DomusControl;

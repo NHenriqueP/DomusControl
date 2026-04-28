@@ -6,7 +6,7 @@ public class ColunaSom extends Dispositivo {
     public ColunaSom(String id, String marca, String modelo, double consumoPorHora, 
                      boolean estado, int volume) {
         super(id, marca, modelo, consumoPorHora, estado);
-        this.volume = volume;
+        setVolume(volume);
     }
 
     public ColunaSom() {
@@ -20,6 +20,9 @@ public class ColunaSom extends Dispositivo {
     }
 
     public void setVolume(int volume) {
+        if (volume < 0 || volume > 100) {
+            throw new IllegalArgumentException("Volume invalido. Use um valor entre 0 e 100.");
+        }
         this.volume = volume;
     }
 

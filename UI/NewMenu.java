@@ -10,7 +10,7 @@
 /*********************************************************************************/
 
 
-package dispositivos;
+package UI;
 
 import java.util.*;
 
@@ -39,6 +39,10 @@ public class NewMenu {
     // Varíável de classe para suportar leitura
 
     private static Scanner is = new Scanner(System.in);
+
+    public static Scanner getScanner() {
+        return is;
+    }
 
     // Variáveis de instância
 
