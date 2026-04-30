@@ -18,11 +18,30 @@ Para facilitar o processo, o projeto possui uma `Makefile`. Abra o terminal na p
   make run
   ```
 
-O programa irá arrancar com os menus da interface de texto (`TextUI`) onde pode interagir com as várias funcionalidades da *SmartHome*.
+- **Para executar os testes de requisitos:**
+  ```bash
+  make test
+  ```
 
-### Limpeza de Ficheiros Compilados
-Caso queira apagar todos os ficheiros `.class` gerados e limpar a sua área de trabalho do projeto, pode executar o seguinte comando:
+- **Para executar os testes unitários JUnit:**
+  ```bash
+  make junit
+  ```
 
-```bash
-make clean
-```
+- **Para limpar ficheiros compilados:**
+  ```bash
+  make clean
+  ```
+
+## Sugestões Inteligentes
+
+O sistema inclui um motor de sugestões automáticas que analisa os padrões de uso dos dispositivos em todas as casas e gera recomendações ao utilizador. As sugestões são acessíveis no menu principal (opção 6).
+
+São gerados três tipos de sugestões, com base nas seguintes condições:
+
+| Tipo | Condição | Descrição |
+| **AUTOMACAO** | Dispositivo ligado/desligado ≥ 5 vezes | Sugere a criação de uma automação para ativar o dispositivo automaticamente, reduzindo operações manuais repetitivas. |
+| **ESCALONAMENTO** | Dispositivo com ≥ 10 horas de uso acumulado | Sugere agendar um ligar/desligar automático, para que o dispositivo não fique ligado indefinidamente. |
+| **EFICIENCIA** | Dispositivo ligado com consumo ≥ 50 Wh | Alerta o utilizador para um dispositivo com consumo energético elevado que está atualmente ligado, sugerindo que o desligue quando não estiver em uso. |
+
+As sugestões são apresentadas por ordem de relevância (maior número de ativações primeiro).

@@ -7,6 +7,7 @@ import casas.TipoAcessoCasa;
 import cenarios.Cenario;
 import dispositivos.Dispositivo;
 import escalonamentos.Escalonamento;
+import sugestoes.Sugestao;
 import utilizadores.Utilizador;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -490,6 +491,50 @@ public class DomusControl implements Serializable {
         sb.append(top3DispositivosMaisUsados()).append("\n");
         sb.append(top3DivisoesComMaisDispositivos()).append("\n");
         return sb.toString();
+    }
+    public List<Sugestao> gerarSugestoes() {
+        List<Sugestao> sugestoes = new ArrayList<>();
+        int limiarAtivacoes = 5;
+        double limiarHorasUso = 10.0;
+        double limiarConsumoAlto = 50.0;
+        for (Map.Entry<String, Casa> entryCasa : this.casas.entrySet()) {
+            String idCasa = entryCasa.getKey();
+            Casa casa = entryCasa.getValue();
+            Map<String, Dispositivo> dispositivos = casa.getDispositivos();
+            Map<String, Divisao> divisoes = casa.getDivisoes();
+            for (Map.Entry<String, Dispositivo> entryDisp : dispositivos.entrySet()) {
+                String idDisp = entryDisp.getKey();
+                Dispositivo disp = entryDisp.getValue();
+                String nomeDivisao = encontrarDivisaoDoDispositivo(divisoes, idDisp);
+                int ativacoes = obterAtivacoesDispositivoCasa(idCasa, idDisp);
+                double horasUso = obterHorasUsoDispositivoCasa(idCasa, idDisp);
+                if (ativacoes >= limiarAtivacoes) {
+                    sugestoes.add(new Sugestao(idCasa, idDisp, nomeDivisao, "AUTOMACAO",
+                        "Dispositivo ligado/desligado " + ativacoes + "x. Considere criar uma automacao para o ativar automaticamente.",
+                        ativacoes, horasUso));
+                }
+                if (horasUso >= limiarHorasUso) {
+                    sugestoes.add(new Sugestao(idCasa, idDisp, nomeDivisao, "ESCALONAMENTO",
+                        "Dispositivo com " + String.format("%.1f", horasUso) + "h de uso. Considere agendar ligar/desligar automatico.",
+                        ativacoes, horasUso));
+                }
+                if (disp.getEstado() && disp.getConsumoPorHora() >= limiarConsumoAlto) {
+                    sugestoes.add(new Sugestao(idCasa, idDisp, nomeDivisao, "EFICIENCIA",
+                        "Dispositivo ligado com consumo elevado (" + String.format("%.1f", disp.getConsumoPorHora()) + " Wh). Considere desliga-lo quando nao estiver em uso.",
+                        ativacoes, horasUso));
+                }
+            }
+        }
+        sugestoes.sort((a, b) -> Integer.compare(b.getAtivacoes(), a.getAtivacoes()));
+        return sugestoes;
+    }
+    private String encontrarDivisaoDoDispositivo(Map<String, Divisao> divisoes, String idDispositivo) {
+        for (Map.Entry<String, Divisao> entry : divisoes.entrySet()) {
+            if (entry.getValue().getIdDispositivos().contains(idDispositivo)) {
+                return entry.getKey();
+            }
+        }
+        return "Desconhecida";
     }
     public void guardarEstadoBinario(String caminhoFicheiro) throws IOException {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(caminhoFicheiro))) {

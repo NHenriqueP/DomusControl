@@ -1,5 +1,6 @@
 package UI;
 import controlador.DomusControl;
+import sugestoes.Sugestao;
 import dispositivos.ColunaSom;
 import dispositivos.Cortina;
 import dispositivos.Dispositivo;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 public class TextUI {
@@ -32,6 +34,7 @@ public class TextUI {
                 "Cenários",
                 "Avançar no Tempo",
                 "Estatísticas",
+                "Sugestões Inteligentes",
                 "Gravar Estado",
                 "Carregar Estado"
         });
@@ -40,8 +43,9 @@ public class TextUI {
         menu.setHandler(3, () -> menuCenarios());
         menu.setHandler(4, () -> avancarTempo());
         menu.setHandler(5, () -> mostrarEstatisticas());
-        menu.setHandler(6, () -> guardarEstado());
-        menu.setHandler(7, () -> carregarEstado());
+        menu.setHandler(6, () -> mostrarSugestoes());
+        menu.setHandler(7, () -> guardarEstado());
+        menu.setHandler(8, () -> carregarEstado());
         menu.run();
     }
     private void menuUtilizadores() {
@@ -518,6 +522,17 @@ public class TextUI {
     }
     private void mostrarEstatisticas() {
         System.out.println(model.obterEstatisticas());
+    }
+    private void mostrarSugestoes() {
+        List<Sugestao> sugestoes = model.gerarSugestoes();
+        if (sugestoes.isEmpty()) {
+            System.out.println("Sem sugestões no momento. Use mais o sistema para gerar dados.");
+        } else {
+            System.out.println("=== Sugestões Inteligentes (" + sugestoes.size() + ") ===");
+            for (int i = 0; i < sugestoes.size(); i++) {
+                System.out.println((i + 1) + ". " + sugestoes.get(i));
+            }
+        }
     }
     private void guardarEstado() {
         try {

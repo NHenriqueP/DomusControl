@@ -271,4 +271,39 @@ public class DomusControlTest {
         clone.criarUtilizador("Outro", "outro@mail.pt");
         assertFalse(model.utilizadorExiste("outro@mail.pt"));
     }
+
+    // ==================== Sugestões Inteligentes ====================
+
+    @Test
+    public void testSugestaoGeradaParaDispositivoMuitoUsado() {
+        model.adicionarDispositivoACasa(idCasa, EMAIL,
+            new Rele("R1", "Shelly", "Plus1", 10, false), "Sala");
+
+        // Ligar e desligar 6 vezes (limiar é 5)
+        for (int i = 0; i < 6; i++) {
+            model.ligarDispositivo(idCasa, EMAIL, "R1");
+            model.desligarDispositivo(idCasa, EMAIL, "R1");
+        }
+
+        java.util.List<sugestoes.Sugestao> sugestoes = model.gerarSugestoes();
+        assertFalse(sugestoes.isEmpty(), "Devem existir sugestões para dispositivos muito usados.");
+        assertTrue(sugestoes.stream().anyMatch(s -> s.getTipo().equals("AUTOMACAO")),
+            "Deve haver uma sugestão do tipo AUTOMACAO.");
+    }
+
+    @Test
+    public void testSemSugestoesParaDispositivoPoucoUsado() {
+        model.adicionarDispositivoACasa(idCasa, EMAIL,
+            new Rele("R1", "Shelly", "Plus1", 5, false), "Sala");
+
+        // Apenas 2 ativações (abaixo do limiar)
+        model.ligarDispositivo(idCasa, EMAIL, "R1");
+        model.desligarDispositivo(idCasa, EMAIL, "R1");
+        model.ligarDispositivo(idCasa, EMAIL, "R1");
+        model.desligarDispositivo(idCasa, EMAIL, "R1");
+
+        java.util.List<sugestoes.Sugestao> sugestoes = model.gerarSugestoes();
+        assertTrue(sugestoes.stream().noneMatch(s -> s.getTipo().equals("AUTOMACAO")),
+            "Não deve haver sugestão AUTOMACAO para dispositivos pouco usados.");
+    }
 }
