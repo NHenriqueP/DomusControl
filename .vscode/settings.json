@@ -1,1 +1,6 @@
-{"java.project.sourcePaths": ["."]}
+{
+    "java.project.sourcePaths": [".", "testes"],
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ]
+}

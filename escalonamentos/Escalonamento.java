@@ -1,24 +1,18 @@
 package escalonamentos;
-
 import automacoes.AcaoAutomacao;
 import casas.Casa;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
-
-
 public class Escalonamento implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private String id;
     private String nome;
     private String idCasa;
     private LocalDateTime instanteExecucao;
     private AcaoAutomacao acao;
     private boolean executado;
-
     public Escalonamento() {
         this.id = UUID.randomUUID().toString();
         this.nome = "";
@@ -27,7 +21,6 @@ public class Escalonamento implements Serializable {
         this.acao = null;
         this.executado = false;
     }
-
     public Escalonamento(String nome, String idCasa, LocalDateTime instanteExecucao, AcaoAutomacao acao) {
         this.id = UUID.randomUUID().toString();
         this.nome = nome;
@@ -36,7 +29,6 @@ public class Escalonamento implements Serializable {
         this.acao = acao;
         this.executado = false;
     }
-
     public Escalonamento(Escalonamento other) {
         this.id = other.id;
         this.nome = other.nome;
@@ -45,42 +37,31 @@ public class Escalonamento implements Serializable {
         this.acao = other.acao;
         this.executado = other.executado;
     }
-
-    // --- Getters ---
-
     public String getId() {
         return this.id;
     }
-
     public String getNome() {
         return this.nome;
     }
-
     public String getIdCasa() {
         return this.idCasa;
     }
-
     public LocalDateTime getInstanteExecucao() {
         return this.instanteExecucao;
     }
-
     public boolean isExecutado() {
         return this.executado;
     }
-
-    // --- Métodos de negócio ---
-
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
     public boolean deveExecutar(LocalDateTime tempoAtual) {
         return !this.executado && !tempoAtual.isBefore(this.instanteExecucao);
     }
-
     public void executar(Casa casa) {
         this.acao.executar(casa);
         this.executado = true;
     }
-
-    // --- Métodos Object ---
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -92,17 +73,14 @@ public class Escalonamento implements Serializable {
             Objects.equals(idCasa, that.idCasa) &&
             Objects.equals(instanteExecucao, that.instanteExecucao);
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(id, nome, idCasa, instanteExecucao, executado);
     }
-
     @Override
     public Escalonamento clone() {
         return new Escalonamento(this);
     }
-
     @Override
     public String toString() {
         return "Escalonamento{" +

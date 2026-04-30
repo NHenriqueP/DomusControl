@@ -4,18 +4,14 @@ import casas.TipoAcessoCasa;
 import controlador.DomusControl;
 import dispositivos.Lampada;
 import dispositivos.Rele;
-
 import java.time.LocalDateTime;
-
 public class TesteRequisitosBaseGestao {
-
     private static void assertCondition(boolean condition, String message) {
         if (!condition) {
             throw new IllegalStateException("FALHOU: " + message);
         }
         System.out.println("OK: " + message);
     }
-
     private static void expectException(Runnable action, String message) {
         try {
             action.run();
@@ -24,144 +20,105 @@ public class TesteRequisitosBaseGestao {
             System.out.println("OK: " + message + " -> " + e.getMessage());
         }
     }
-
     public static void main(String[] args) throws Exception {
         DomusControl dc = new DomusControl();
-
-        // 1) Criar utilizadores
         dc.criarUtilizador("Henriqueta Turista", "henriqueta@domus.pt");
         dc.criarUtilizador("Nuna Afonso", "nuna@domus.pt");
         dc.criarUtilizador("Gustavo Lopes", "gustavo@domus.pt");
         assertCondition(dc.utilizadorExiste("henriqueta@domus.pt"), "utilizador Henriqueta Turista criado");
-
-        // 2) Criar casa e atribuir acesso
         String idCasa = dc.criarCasa("henriqueta@domus.pt", 4700, "EDP");
         dc.atribuirAcessoCasa(idCasa, "nuna@domus.pt", TipoAcessoCasa.UTILIZADOR);
         assertCondition(dc.obterCasa(idCasa) != null, "casa criada com id valido");
-
-        // 3) Criar divisoes e associar dispositivos
         dc.adicionarDivisaoACasa(idCasa, "henriqueta@domus.pt", "Sala");
         dc.adicionarDivisaoACasa(idCasa, "henriqueta@domus.pt", "Quarto");
         dc.adicionarDivisaoACasa(idCasa, "henriqueta@domus.pt", "Cozinha");
-
         Rele releSala = new Rele("RELE-1", "Shelly", "Plus1", 15.0, false);
         Lampada lampadaQuarto = new Lampada("LAMP-1", "Philips", "Hue", 9.5, false, 70, true, 3000);
-
         dc.adicionarDispositivoACasa(idCasa, "henriqueta@domus.pt", releSala, "Sala");
         dc.adicionarDispositivoACasa(idCasa, "henriqueta@domus.pt", lampadaQuarto, "Quarto");
         dc.adicionarDispositivoACasa(idCasa, "henriqueta@domus.pt",
             new Rele("RELE-COZ-1", "Shelly", "Kitchen", 11.0, false), "Cozinha");
-
         assertCondition(!dc.obterCasa(idCasa).getDispositivos().get("RELE-1").getEstado(), "rele inicia desligado");
         assertCondition(!dc.obterCasa(idCasa).getDispositivos().get("LAMP-1").getEstado(), "lampada inicia desligada");
-
-        // 4) Atuar num dispositivo especifico
         dc.ligarDispositivo(idCasa, "nuna@domus.pt", "RELE-1");
         assertCondition(dc.obterCasa(idCasa).getDispositivos().get("RELE-1").getEstado(), "ligar dispositivo especifico");
-
         dc.desligarDispositivo(idCasa, "nuna@domus.pt", "RELE-1");
         assertCondition(!dc.obterCasa(idCasa).getDispositivos().get("RELE-1").getEstado(), "desligar dispositivo especifico");
-
-        // 5) Operar por divisao
         dc.ligarDispositivosDivisao(idCasa, "Quarto");
         assertCondition(dc.obterCasa(idCasa).getDispositivos().get("LAMP-1").getEstado(), "ligar dispositivos da divisao");
-
         dc.desligarDispositivosDivisao(idCasa, "Quarto");
         assertCondition(!dc.obterCasa(idCasa).getDispositivos().get("LAMP-1").getEstado(), "desligar dispositivos da divisao");
-
-        // 6) Testar regra de acesso (utilizador sem acesso)
         expectException(
             () -> dc.ligarDispositivo(idCasa, "gustavo@domus.pt", "RELE-1"),
             "bloquear operacao de utilizador sem acesso"
         );
-
-        // 7) Estatisticas de uso (tempo + ativacoes)
         dc.ligarDispositivo(idCasa, "nuna@domus.pt", "RELE-1");
         dc.avancarHoras(2);
         dc.desligarDispositivo(idCasa, "nuna@domus.pt", "RELE-1");
-
         assertCondition(dc.obterAtivacoesDispositivoCasa(idCasa, "RELE-1") >= 2,
             "ativacoes do RELE-1 contabilizadas");
         assertCondition(dc.obterHorasUsoDispositivoCasa(idCasa, "RELE-1") >= 2.0,
             "tempo de uso do RELE-1 contabilizado");
-
-        // 8) Criar segunda casa para testar rankings globais
         String idCasa2 = dc.criarCasa("henriqueta@domus.pt", 4710, "GALP");
         dc.adicionarDivisaoACasa(idCasa2, "henriqueta@domus.pt", "Cozinha");
-
         dc.adicionarDispositivoACasa(idCasa2, "henriqueta@domus.pt",
             new Rele("RELE-2", "Shelly", "Plus2", 12.0, false), "Cozinha");
         dc.adicionarDispositivoACasa(idCasa2, "henriqueta@domus.pt",
             new Lampada("LAMP-2", "Ikea", "Tradfri", 8.0, false, 60, false, 2700), "Cozinha");
         dc.adicionarDispositivoACasa(idCasa2, "henriqueta@domus.pt",
             new Rele("RELE-3", "Shelly", "Mini", 10.0, false), "Cozinha");
-
         String topDivisoes = dc.top3DivisoesComMaisDispositivos();
         assertCondition(topDivisoes.contains("Cozinha"), "top 3 divisoes inclui Cozinha");
-
         String topCasa = dc.top3DispositivosMaisUsadosCasa(idCasa);
         assertCondition(topCasa.contains("RELE-1"), "top da casa inclui RELE-1");
-
-        // 9) Persistencia binaria (gravar e ler)
         String ficheiro = "estado_domus.bin";
         dc.guardarEstadoBinario(ficheiro);
         DomusControl carregado = DomusControl.lerEstadoBinario(ficheiro);
-
         assertCondition(carregado.obterCasa(idCasa) != null, "leitura binaria recupera a casa 1");
         assertCondition(carregado.obterCasa(idCasa2) != null, "leitura binaria recupera a casa 2");
         assertCondition(carregado.obterAtivacoesDispositivoCasa(idCasa, "RELE-1") >= 2,
             "leitura binaria preserva estatisticas de ativacao");
-
-        // 10) Criar cinco automacoes e verificar ativacao
         dc.adicionarDispositivoACasa(idCasa, "henriqueta@domus.pt",
             new Rele("RELE-SALA-2", "Shelly", "Plus1PM", 13.0, false), "Sala");
-
         dc.desligarDispositivo(idCasa, "nuna@domus.pt", "LAMP-1");
         dc.desligarDispositivo(idCasa, "nuna@domus.pt", "RELE-1");
         dc.ligarDispositivo(idCasa, "nuna@domus.pt", "RELE-COZ-1");
-
         Automacao automacaoLigarLampada = new Automacao(
             "Auto ligar lampada",
             "Liga LAMP-1 quando estiver desligada",
             casa -> casa.getDispositivos().containsKey("LAMP-1") && !casa.getDispositivos().get("LAMP-1").getEstado(),
             casa -> casa.ligarDispositivosDivisao("Quarto")
         );
-
         Automacao automacaoLigarRele = new Automacao(
             "Auto ligar rele",
             "Liga RELE-1 quando estiver desligado",
             casa -> casa.getDispositivos().containsKey("RELE-1") && !casa.getDispositivos().get("RELE-1").getEstado(),
             casa -> casa.ligarDispositivosDivisao("Sala")
         );
-
         Automacao automacaoDesligarCozinha = new Automacao(
             "Auto desligar cozinha",
             "Desliga COZINHA se RELE-COZ-1 estiver ligado",
             casa -> casa.getDispositivos().containsKey("RELE-COZ-1") && casa.getDispositivos().get("RELE-COZ-1").getEstado(),
             casa -> casa.desligarDispositivosDivisao("Cozinha")
         );
-
         Automacao automacaoGarantirSalaLigada = new Automacao(
             "Auto garantir sala",
             "Mantem sala ligada",
             casa -> true,
             casa -> casa.ligarDispositivosDivisao("Sala")
         );
-
         Automacao automacaoGarantirQuartoLigado = new Automacao(
             "Auto garantir quarto",
             "Mantem quarto ligado",
             casa -> true,
             casa -> casa.ligarDispositivosDivisao("Quarto")
         );
-
         dc.associarAutomacaoCasa(idCasa, "henriqueta@domus.pt", automacaoLigarLampada);
         dc.associarAutomacaoCasa(idCasa, "henriqueta@domus.pt", automacaoLigarRele);
         dc.associarAutomacaoCasa(idCasa, "henriqueta@domus.pt", automacaoDesligarCozinha);
         dc.associarAutomacaoCasa(idCasa, "henriqueta@domus.pt", automacaoGarantirSalaLigada);
         dc.associarAutomacaoCasa(idCasa, "henriqueta@domus.pt", automacaoGarantirQuartoLigado);
         dc.executarAutomacoesCasa(idCasa);
-
         assertCondition(dc.obterCasa(idCasa).getAutomacoes().size() == 5,
             "total de 5 automacoes associado");
         assertCondition(dc.obterCasa(idCasa).getDispositivos().get("LAMP-1").getEstado(),
@@ -174,8 +131,6 @@ public class TesteRequisitosBaseGestao {
             "automacao 4 ativada");
         assertCondition(dc.obterCasa(idCasa).getDispositivos().get("LAMP-1").getEstado(),
             "automacao 5 ativada");
-
-        // 11) Definir sete escalonamentos e testar execucao
         LocalDateTime base = dc.getTempoAtual();
         dc.criarEscalonamento("Escalonamento 1", idCasa, base.plusHours(1), casa -> casa.ligarDispositivosDivisao("Sala"));
         dc.criarEscalonamento("Escalonamento 2", idCasa, base.plusHours(2), casa -> casa.desligarDispositivosDivisao("Sala"));
@@ -184,7 +139,6 @@ public class TesteRequisitosBaseGestao {
         dc.criarEscalonamento("Escalonamento 5", idCasa, base.plusHours(5), casa -> casa.ligarDispositivosDivisao("Cozinha"));
         dc.criarEscalonamento("Escalonamento 6", idCasa, base.plusHours(6), casa -> casa.desligarDispositivosDivisao("Cozinha"));
         dc.criarEscalonamento("Escalonamento 7", idCasa, base.plusHours(7), casa -> casa.ligarDispositivosDivisao("Sala"));
-
         int totalExecutados = 0;
         for (int i = 1; i <= 7; i++) {
             dc.avancarHoras(1);
@@ -193,19 +147,14 @@ public class TesteRequisitosBaseGestao {
             totalExecutados += executadosNestaHora;
         }
         assertCondition(totalExecutados == 7, "sete escalonamentos executados");
-
         String listaEscalonamentos = dc.listarEscalonamentos();
         assertCondition(listaEscalonamentos.contains("Escalonamento 7") && listaEscalonamentos.contains("Executado: true"),
             "lista de escalonamentos atualizada");
-
-        // 12) Criar e testar quatro cenarios
         dc.ligarDispositivo(idCasa, "nuna@domus.pt", "RELE-1");
         dc.ligarDispositivo(idCasa, "nuna@domus.pt", "LAMP-1");
         dc.ligarDispositivo(idCasa, "nuna@domus.pt", "RELE-COZ-1");
-
         dc.aplicarCenarioSairDeCasa(idCasa);
         assertCondition(dc.totalDispositivosLigadosCasa(idCasa) == 0, "cenario sair de casa aplicado");
-
         dc.aplicarCenarioJantarComAmigos(idCasa);
         assertCondition(dc.obterCasa(idCasa).getDispositivos().get("RELE-1").getEstado(),
             "cenario jantar com amigos liga sala");
@@ -213,19 +162,16 @@ public class TesteRequisitosBaseGestao {
             "cenario jantar com amigos liga cozinha");
         assertCondition(!dc.obterCasa(idCasa).getDispositivos().get("LAMP-1").getEstado(),
             "cenario jantar com amigos desliga quarto");
-
         dc.aplicarCenarioDeitar(idCasa);
         assertCondition(dc.obterCasa(idCasa).getDispositivos().get("LAMP-1").getEstado(),
             "cenario deitar liga quarto");
         assertCondition(!dc.obterCasa(idCasa).getDispositivos().get("RELE-1").getEstado(),
             "cenario deitar desliga sala");
-
         dc.aplicarCenarioAcordar(idCasa);
         assertCondition(dc.obterCasa(idCasa).getDispositivos().get("LAMP-1").getEstado(),
             "cenario acordar mantem quarto ligado");
         assertCondition(dc.obterCasa(idCasa).getDispositivos().get("RELE-COZ-1").getEstado(),
             "cenario acordar liga cozinha");
-
         System.out.println("\nTeste completo concluido com sucesso: base, estatisticas, persistencia, automacoes, escalonamentos e cenarios.");
     }
 }

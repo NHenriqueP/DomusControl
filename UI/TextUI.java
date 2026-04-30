@@ -1,5 +1,4 @@
 package UI;
-
 import controlador.DomusControl;
 import dispositivos.ColunaSom;
 import dispositivos.Cortina;
@@ -18,17 +17,14 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Scanner;
-
 public class TextUI {
     private DomusControl model;
     private Scanner sc;
     private static final String FICHEIRO_ESTADO = "estado_domus.bin";
-
     public TextUI() {
         this.model = new DomusControl();
         sc = NewMenu.getScanner();
     }
-
     public void run() {
         NewMenu menu = new NewMenu(new String[] {
                 "Gestão de Utilizadores",
@@ -39,7 +35,6 @@ public class TextUI {
                 "Gravar Estado",
                 "Carregar Estado"
         });
-
         menu.setHandler(1, () -> menuUtilizadores());
         menu.setHandler(2, () -> menuCasas());
         menu.setHandler(3, () -> menuCenarios());
@@ -47,12 +42,8 @@ public class TextUI {
         menu.setHandler(5, () -> mostrarEstatisticas());
         menu.setHandler(6, () -> guardarEstado());
         menu.setHandler(7, () -> carregarEstado());
-
         menu.run();
     }
-
-    // ========================= Utilizadores =========================
-
     private void menuUtilizadores() {
         NewMenu menu = new NewMenu(new String[] {
                 "Adicionar Utilizador",
@@ -64,7 +55,6 @@ public class TextUI {
         menu.setHandler(3, () -> remUtilizador());
         menu.run();
     }
-
     private void addUtilizador() {
         System.out.print("Nome do Utilizador: ");
         String nome = sc.nextLine();
@@ -77,7 +67,6 @@ public class TextUI {
             System.out.println("Erro: " + e.getMessage());
         }
     }
-
     private void listUtilizadores() {
         Map<String, Utilizador> utilizadores = model.obterTodosUtilizadores();
         if (utilizadores.isEmpty()) {
@@ -88,7 +77,6 @@ public class TextUI {
             }
         }
     }
-
     private void remUtilizador() {
         System.out.print("Email do Utilizador a remover: ");
         String email = sc.nextLine();
@@ -99,9 +87,6 @@ public class TextUI {
             System.out.println("Erro: Utilizador não encontrado.");
         }
     }
-
-    // ========================= Casas =========================
-
     private void menuCasas() {
         NewMenu menu = new NewMenu(new String[] {
                 "Adicionar Casa",
@@ -115,7 +100,6 @@ public class TextUI {
         menu.setHandler(4, () -> gerirCasaEspecifica());
         menu.run();
     }
-
     private void addCasa() {
         System.out.print("Email do Proprietário: ");
         String email = sc.nextLine();
@@ -136,13 +120,11 @@ public class TextUI {
             System.out.println("Erro: " + e.getMessage());
         }
     }
-
     private void listCasas() {
         Map<String, Casa> casas = model.obterTodasCasas();
         if (casas.isEmpty()) { System.out.println("Nenhuma casa registada."); }
         else { for (Casa c : casas.values()) System.out.println(c); }
     }
-
     private void remCasa() {
         System.out.print("ID da Casa a remover: ");
         String idCasa = sc.nextLine();
@@ -153,9 +135,6 @@ public class TextUI {
             System.out.println("Erro: Casa não encontrada.");
         }
     }
-
-    // ========================= Gerir Casa =========================
-
     private void gerirCasaEspecifica() {
         System.out.print("ID da Casa a gerir: ");
         String idCasa = sc.nextLine();
@@ -169,7 +148,6 @@ public class TextUI {
             System.out.println("Erro: Utilizador não encontrado.");
             return;
         }
-
         NewMenu menu = new NewMenu(new String[] {
                 "Adicionar Divisão",
                 "Listar Divisões",
@@ -192,9 +170,6 @@ public class TextUI {
         menu.setHandler(9, () -> aplicarCenario(idCasa));
         menu.run();
     }
-
-    // ========================= Divisões =========================
-
     private void addDivisao(String idCasa, String email) {
         System.out.print("Nome da nova Divisão: ");
         String nome = sc.nextLine();
@@ -205,7 +180,6 @@ public class TextUI {
             System.out.println("Erro: " + e.getMessage());
         }
     }
-
     private void listDivisoes(String idCasa) {
         Casa casa = model.obterCasa(idCasa);
         if (casa.getDivisoes().isEmpty()) {
@@ -216,9 +190,6 @@ public class TextUI {
             }
         }
     }
-
-    // ========================= Dispositivos =========================
-
     private void addDispositivo(String idCasa, String email) {
         System.out.println("Tipo de Dispositivo:");
         System.out.println("1 - Lâmpada  2 - Coluna de Som  3 - Cortina  4 - Portão de Garagem  5 - Relé");
@@ -226,7 +197,6 @@ public class TextUI {
         int tipo;
         try { tipo = Integer.parseInt(sc.nextLine()); }
         catch (NumberFormatException e) { System.out.println("Opção inválida."); return; }
-
         System.out.print("ID do Dispositivo: ");
         String id = sc.nextLine();
         System.out.print("Marca: ");
@@ -239,7 +209,6 @@ public class TextUI {
         catch (NumberFormatException e) { System.out.println("Valor de consumo inválido."); return; }
         System.out.print("Estado Inicial (1 para Ligado, 0 para Desligado): ");
         boolean estado = sc.nextLine().equals("1");
-
         Dispositivo d = null;
         try {
             switch (tipo) {
@@ -272,7 +241,6 @@ public class TextUI {
         } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("Erro: " + e.getMessage()); return;
         }
-
         System.out.print("Nome da Divisão: ");
         String divisao = sc.nextLine();
         try {
@@ -282,14 +250,12 @@ public class TextUI {
             System.out.println("Erro: " + e.getMessage());
         }
     }
-
     private void listDispositivos(String idCasa) {
         Casa casa = model.obterCasa(idCasa);
         Map<String, Dispositivo> dispositivos = casa.getDispositivos();
         if (dispositivos.isEmpty()) { System.out.println("Sem dispositivos registados."); }
         else { for (Dispositivo d : dispositivos.values()) System.out.println(d); }
     }
-
     private void toggleDispositivo(String idCasa, String email) {
         System.out.print("ID do Dispositivo: ");
         String id = sc.nextLine();
@@ -302,23 +268,18 @@ public class TextUI {
             System.out.println("Erro: " + e.getMessage());
         }
     }
-
-    // ========================= Operações Específicas =========================
-
     private void operarDispositivo(String idCasa, String email) {
         System.out.print("ID do Dispositivo: ");
         String id = sc.nextLine();
         Dispositivo d = model.obterDispositivoCasa(idCasa, id);
         if (d == null) { System.out.println("Erro: Dispositivo não encontrado."); return; }
         System.out.println("Estado atual: " + d);
-
         if (d instanceof Lampada) menuLampada(idCasa, email, id);
         else if (d instanceof ColunaSom) menuColunaSom(idCasa, email, id);
         else if (d instanceof Cortina) menuCortina(idCasa, email, id);
         else if (d instanceof PortaoGaragem) menuPortaoGaragem(idCasa, email, id);
         else System.out.println("Este dispositivo apenas suporta ligar/desligar.");
     }
-
     private void menuLampada(String idCasa, String email, String idDisp) {
         NewMenu menu = new NewMenu(new String[] { "Ajustar Intensidade", "Ajustar Temperatura de Cor" });
         menu.setHandler(1, () -> {
@@ -339,7 +300,6 @@ public class TextUI {
         });
         menu.run();
     }
-
     private void menuColunaSom(String idCasa, String email, String idDisp) {
         NewMenu menu = new NewMenu(new String[] { "Ajustar Volume" });
         menu.setHandler(1, () -> {
@@ -352,7 +312,6 @@ public class TextUI {
         });
         menu.run();
     }
-
     private void menuCortina(String idCasa, String email, String idDisp) {
         NewMenu menu = new NewMenu(new String[] { "Ajustar Abertura", "Abrir Totalmente", "Fechar Totalmente" });
         menu.setHandler(1, () -> {
@@ -373,7 +332,6 @@ public class TextUI {
         });
         menu.run();
     }
-
     private void menuPortaoGaragem(String idCasa, String email, String idDisp) {
         NewMenu menu = new NewMenu(new String[] { "Ajustar Abertura", "Abrir Totalmente", "Fechar Totalmente" });
         menu.setHandler(1, () -> {
@@ -394,9 +352,6 @@ public class TextUI {
         });
         menu.run();
     }
-
-    // ========================= Automações =========================
-
     private void menuAutomacoes(String idCasa, String email) {
         NewMenu menu = new NewMenu(new String[] {
                 "Criar Automação",
@@ -413,25 +368,21 @@ public class TextUI {
         });
         menu.run();
     }
-
     private void criarAutomacao(String idCasa, String email) {
         System.out.print("Nome da automação: ");
         String nome = sc.nextLine();
         System.out.print("Descrição: ");
         String desc = sc.nextLine();
-
         System.out.println("Condição — dispositivo a verificar:");
         System.out.print("  ID do dispositivo de condição: ");
         String idCondDisp = sc.nextLine();
         System.out.print("  Condição: 1=ligado, 0=desligado: ");
         boolean condLigado = sc.nextLine().equals("1");
-
         System.out.println("Ação — divisão a atuar:");
         System.out.print("  Nome da divisão: ");
         String divAcao = sc.nextLine();
         System.out.print("  Ação: 1=ligar, 0=desligar: ");
         boolean acaoLigar = sc.nextLine().equals("1");
-
         Automacao automacao = new Automacao(nome, desc,
             casa -> {
                 Dispositivo d = casa.getDispositivos().get(idCondDisp);
@@ -442,13 +393,11 @@ public class TextUI {
                 else casa.desligarDispositivosDivisao(divAcao);
             }
         );
-
         try {
             model.associarAutomacaoCasa(idCasa, email, automacao);
             System.out.println("Automação criada com sucesso.");
         } catch (Exception e) { System.out.println("Erro: " + e.getMessage()); }
     }
-
     private void listarAutomacoes(String idCasa) {
         Casa casa = model.obterCasa(idCasa);
         if (casa == null) { System.out.println("Casa não encontrada."); return; }
@@ -456,7 +405,6 @@ public class TextUI {
         if (automacoes.isEmpty()) { System.out.println("Sem automações definidas."); }
         else { for (Automacao a : automacoes.values()) System.out.println(a); }
     }
-
     private void removerAutomacao(String idCasa, String email) {
         listarAutomacoes(idCasa);
         System.out.print("ID da automação a remover: ");
@@ -468,9 +416,6 @@ public class TextUI {
             System.out.println("Nota: a remoção via clone não persiste. Use o modelo directamente se necessário.");
         } catch (Exception e) { System.out.println("Erro: " + e.getMessage()); }
     }
-
-    // ========================= Escalonamentos =========================
-
     private void menuEscalonamentos(String idCasa) {
         NewMenu menu = new NewMenu(new String[] {
                 "Criar Escalonamento",
@@ -485,7 +430,6 @@ public class TextUI {
         });
         menu.run();
     }
-
     private void criarEscalonamento(String idCasa) {
         System.out.print("Nome do escalonamento: ");
         String nome = sc.nextLine();
@@ -497,7 +441,6 @@ public class TextUI {
         int horas;
         try { horas = Integer.parseInt(sc.nextLine()); }
         catch (NumberFormatException e) { System.out.println("Valor inválido."); return; }
-
         LocalDateTime instante = model.getTempoAtual().plusHours(horas);
         try {
             String id = model.criarEscalonamento(nome, idCasa, instante,
@@ -505,9 +448,6 @@ public class TextUI {
             System.out.println("Escalonamento criado. Execução às " + instante);
         } catch (Exception e) { System.out.println("Erro: " + e.getMessage()); }
     }
-
-    // ========================= Cenários =========================
-
     private void menuCenarios() {
         NewMenu menu = new NewMenu(new String[] {
                 "Listar Cenários",
@@ -519,20 +459,17 @@ public class TextUI {
         menu.setHandler(3, () -> removerCenario());
         menu.run();
     }
-
     private void listarCenarios() {
         Map<String, Cenario> cenarios = model.obterCenarios();
         if (cenarios.isEmpty()) { System.out.println("Sem cenários definidos."); }
         else { for (Cenario c : cenarios.values()) System.out.println(c); }
     }
-
     private void criarCenario() {
         System.out.print("Nome do cenário: ");
         String nome = sc.nextLine();
         System.out.print("Descrição: ");
         String desc = sc.nextLine();
         Cenario cenario = new Cenario(nome, desc);
-
         System.out.println("Adicione ações (divisão + ligar/desligar). Escreva 'fim' para terminar.");
         while (true) {
             System.out.print("  Divisão (ou 'fim'): ");
@@ -544,11 +481,9 @@ public class TextUI {
             else cenario.adicionarAcao(casa -> casa.desligarDispositivosDivisao(div));
             System.out.println("  Ação adicionada.");
         }
-
         model.criarCenario(cenario);
         System.out.println("Cenário '" + nome + "' criado com " + cenario.getAcoes().size() + " ações.");
     }
-
     private void removerCenario() {
         listarCenarios();
         System.out.print("ID do cenário a remover: ");
@@ -556,7 +491,6 @@ public class TextUI {
         model.removerCenario(id);
         System.out.println("Cenário removido.");
     }
-
     private void aplicarCenario(String idCasa) {
         Map<String, Cenario> cenarios = model.obterCenarios();
         if (cenarios.isEmpty()) { System.out.println("Sem cenários disponíveis."); return; }
@@ -568,9 +502,6 @@ public class TextUI {
             System.out.println("Cenário aplicado com sucesso.");
         } catch (Exception e) { System.out.println("Erro: " + e.getMessage()); }
     }
-
-    // ========================= Tempo, Estado e Estatísticas =========================
-
     private void avancarTempo() {
         System.out.print("Avançar quantos dias? ");
         int dias;
@@ -585,11 +516,9 @@ public class TextUI {
         model.executarEscalonamentosPendentes();
         System.out.println("Tempo avançado. Tempo atual: " + model.getTempoAtual());
     }
-
     private void mostrarEstatisticas() {
         System.out.println(model.obterEstatisticas());
     }
-
     private void guardarEstado() {
         try {
             model.guardarEstadoBinario(FICHEIRO_ESTADO);
@@ -598,7 +527,6 @@ public class TextUI {
             System.out.println("Erro ao gravar: " + e.getMessage());
         }
     }
-
     private void carregarEstado() {
         try {
             this.model = DomusControl.lerEstadoBinario(FICHEIRO_ESTADO);
