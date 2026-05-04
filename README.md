@@ -4,33 +4,29 @@ João Pedro Cunha Cerqueira - A111753 - Cerqueira4618
 Rafael Figueiras Esteves - A112032 - Rafabass1
 Nuno Henrique Dias Pereira - A110067 - NHenriqueP
 
-## Como Compilar e Testar o Programa
 
-Para facilitar o processo, o projeto possui uma `Makefile`. Abra o terminal na pasta raiz do projeto e pode utilizar os seguintes comandos:
+### Utilizando Gradle
 
-- **Para compilar o código:**
+Alternativamente, se tiver o Gradle instalado, pode gerir o projeto com os seguintes comandos:
+
+- **Para compilar:**
   ```bash
-  make
+  ./gradlew build -x test
   ```
 
-- **Para compilar e iniciar logo o programa de imediato:**
+- **Para iniciar o programa:**
   ```bash
-  make run
-  ```
-
-- **Para executar os testes de requisitos:**
-  ```bash
-  make test
+  ./gradlew run
   ```
 
 - **Para executar os testes unitários JUnit:**
   ```bash
-  make junit
+  ./gradlew test
   ```
 
-- **Para limpar ficheiros compilados:**
+- **Para limpar os ficheiros de build:**
   ```bash
-  make clean
+  ./gradlew clean
   ```
 
 ## Sugestões Inteligentes

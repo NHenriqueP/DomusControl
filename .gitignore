@@ -1,0 +1,9 @@
+*.class
+# Gradle
+.gradle/
+build/
+# VS Code
+.vscode/
+# IntelliJ IDEA
+.idea/
+*.iml
