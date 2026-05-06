@@ -1,6 +1,7 @@
 package testes;
 
 import casas.Casa;
+import casas.Divisao;
 import casas.TipoAcessoCasa;
 import dispositivos.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,11 +12,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Testes unitários para a classe Casa.
- * Cobre: controlo de acessos, gestão de divisões/dispositivos,
- * encapsulamento (cópias defensivas), equals/clone e polimorfismo.
- */
 public class CasaTest {
 
     private Casa casa;
@@ -33,8 +29,6 @@ public class CasaTest {
         casa.atribuirAcesso(admin, TipoAcessoCasa.ADMINISTRADOR);
         casa.atribuirAcesso(utilizador, TipoAcessoCasa.UTILIZADOR);
     }
-
-    // ==================== Controlo de Acessos ====================
 
     @Test
     public void testAdminPodeCriarDivisao() {
@@ -66,11 +60,8 @@ public class CasaTest {
         assertTrue(casa.getDispositivos().get("R1").getEstado());
     }
 
-    // ==================== Gestão de Dispositivos ====================
-
     @Test
     public void testAdicionarDispositivoCriaDivisaoSeNaoExistir() {
-        // A divisão "Garagem" não existe previamente
         casa.addDispositivo(admin, new PortaoGaragem("P1", "Nice", "Mod", 20, false, 0), "Garagem");
 
         assertTrue(casa.getDivisoes().containsKey("Garagem"));
@@ -101,13 +92,9 @@ public class CasaTest {
         assertTrue(casa.getDispositivos().get("L1").getEstado());
     }
 
-    // ==================== Polimorfismo ====================
-
     @Test
     public void testDispositivoPolimorfismo() {
         casa.addDivisao(admin, "Sala");
-
-        // Adicionar diferentes subtipos de Dispositivo
         Dispositivo rele = new Rele("R1", "Shelly", "Plus1", 10, false);
         Dispositivo lampada = new Lampada("L1", "Philips", "Hue", 9, false, 50, true, 3000);
         Dispositivo cortina = new Cortina("C1", "Somfy", "IO", 5, false, 0);
@@ -118,7 +105,6 @@ public class CasaTest {
         casa.addDispositivo(admin, cortina, "Sala");
         casa.addDispositivo(admin, coluna, "Sala");
 
-        // Todos devem poder ser ligados/desligados de forma polimórfica
         casa.ligarDispositivosDivisao("Sala");
         Map<String, Dispositivo> dispositivos = casa.getDispositivos();
         assertEquals(4, dispositivos.size());
@@ -127,25 +113,45 @@ public class CasaTest {
         }
     }
 
-    // ==================== Encapsulamento (Cópias Defensivas) ====================
+    @Test
+    public void testDivisaoAddRemoveDispositivo() {
+        Divisao divisao = new Divisao("Sala");
+
+        divisao.addDispositivo("D1");
+        divisao.addDispositivo("D1");
+        assertTrue(divisao.existeDispositivo("D1"));
+        assertEquals(1, divisao.getIdDispositivos().size());
+
+        divisao.removeDispositivo("D1");
+        assertFalse(divisao.existeDispositivo("D1"));
+    }
+
+    @Test
+    public void testCasaOperarSobreDispositivo() {
+        casa.addDivisao(admin, "Garagem");
+        casa.addDispositivo(admin, new PortaoGaragem("P1", "Nice", "Mod", 20, false, 0), "Garagem");
+
+        casa.operarSobreDispositivo(admin, "P1", d -> ((PortaoGaragem) d).abrirPortao());
+
+        PortaoGaragem portao = (PortaoGaragem) casa.getDispositivos().get("P1");
+        assertEquals(100, portao.getPercentagemAbertura());
+    }
+
+    @Test
+    public void testCasaOperarSobreDispositivoInexistente() {
+        assertThrows(IllegalArgumentException.class, () ->
+            casa.operarSobreDispositivo(admin, "X1", d -> d.ligarDispositivo()));
+    }
 
     @Test
     public void testGetDispositivosDevolveClone() {
         casa.addDivisao(admin, "Sala");
         casa.addDispositivo(admin, new Rele("R1", "Shelly", "Plus1", 10, false), "Sala");
-
-        // Obter o mapa de dispositivos (deve ser uma cópia)
         Map<String, Dispositivo> copia = casa.getDispositivos();
-
-        // Modificar a cópia não deve afetar o original
         copia.get("R1").ligarDispositivo();
-
-        // O dispositivo original dentro da casa deve continuar desligado
         assertFalse(casa.getDispositivos().get("R1").getEstado(),
             "Modificar o clone não deve afetar o dispositivo interno da casa.");
     }
-
-    // ==================== equals / clone ====================
 
     @Test
     public void testCloneCriaObjetoIndependente() {
@@ -153,14 +159,8 @@ public class CasaTest {
         casa.addDispositivo(admin, new Rele("R1", "Shelly", "Plus1", 10, false), "Sala");
 
         Casa clone = casa.clone();
-
-        // O clone deve ser igual ao original
         assertEquals(casa, clone);
-
-        // Mas não deve ser o mesmo objeto
         assertNotSame(casa, clone);
-
-        // Modificar o clone não deve afetar o original
         clone.addDivisao(admin, "Quarto");
         assertFalse(casa.getDivisoes().containsKey("Quarto"),
             "Modificar o clone não deve afetar a casa original.");
@@ -171,19 +171,12 @@ public class CasaTest {
         Casa casa2 = casa.clone();
         Casa casa3 = casa2.clone();
 
-        // Reflexivo
         assertEquals(casa, casa);
-
-        // Simétrico
         assertEquals(casa, casa2);
         assertEquals(casa2, casa);
-
-        // Transitivo
         assertEquals(casa, casa2);
         assertEquals(casa2, casa3);
         assertEquals(casa, casa3);
-
-        // Diferente de null
         assertNotEquals(null, casa);
     }
 }
