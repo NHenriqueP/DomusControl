@@ -240,6 +240,11 @@ public class DomusControl implements Serializable {
         Utilizador utilizador = obterUtilizadorOuErro(emailUtilizador);
         casa.associarAutomacao(utilizador, automacao);
     }
+    public void removerAutomacaoCasa(String idCasa, String emailUtilizador, String idAutomacao) {
+        Casa casa = obterCasaOuErro(idCasa);
+        Utilizador utilizador = obterUtilizadorOuErro(emailUtilizador);
+        casa.removerAutomacao(utilizador, idAutomacao);
+    }
     public void executarAutomacoesCasa(String idCasa) {
         Casa casa = obterCasaOuErro(idCasa);
         casa.executarAutomacoes();

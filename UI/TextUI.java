@@ -13,6 +13,7 @@ import escalonamentos.Escalonamento;
 import automacoes.Automacao;
 import utilizadores.Utilizador;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -129,23 +130,37 @@ public class TextUI {
         if (casas.isEmpty()) { System.out.println("Nenhuma casa registada."); }
         else { for (Casa c : casas.values()) System.out.println(c); }
     }
-    private void remCasa() {
-        System.out.print("ID da Casa a remover: ");
-        String idCasa = sc.nextLine();
-        if (model.obterCasa(idCasa) != null) {
-            model.removerCasa(idCasa);
-            System.out.println("Casa removida com sucesso.");
-        } else {
-            System.out.println("Erro: Casa não encontrada.");
+    private String selecionarCasa() {
+        Map<String, Casa> casas = model.obterTodasCasas();
+        if (casas.isEmpty()) {
+            System.out.println("Nenhuma casa registada.");
+            return null;
         }
+        List<String> ids = new ArrayList<>(casas.keySet());
+        System.out.println("Casas disponíveis:");
+        for (int i = 0; i < ids.size(); i++) {
+            Casa c = casas.get(ids.get(i));
+            System.out.println("  " + (i + 1) + ". " + c.getNomeProprietario() + " (CP: " + c.getCodigoPostal() + ") — " + c.getFornecedorEnergia());
+        }
+        System.out.print("Escolha (número): ");
+        int escolha;
+        try { escolha = Integer.parseInt(sc.nextLine()); }
+        catch (NumberFormatException e) { System.out.println("Opção inválida."); return null; }
+        if (escolha < 1 || escolha > ids.size()) {
+            System.out.println("Opção inválida.");
+            return null;
+        }
+        return ids.get(escolha - 1);
+    }
+    private void remCasa() {
+        String idCasa = selecionarCasa();
+        if (idCasa == null) return;
+        model.removerCasa(idCasa);
+        System.out.println("Casa removida com sucesso.");
     }
     private void gerirCasaEspecifica() {
-        System.out.print("ID da Casa a gerir: ");
-        String idCasa = sc.nextLine();
-        if (model.obterCasa(idCasa) == null) {
-            System.out.println("Erro: Casa não encontrada.");
-            return;
-        }
+        String idCasa = selecionarCasa();
+        if (idCasa == null) return;
         System.out.print("Email do Utilizador: ");
         String email = sc.nextLine();
         if (!model.utilizadorExiste(email)) {
@@ -410,14 +425,23 @@ public class TextUI {
         else { for (Automacao a : automacoes.values()) System.out.println(a); }
     }
     private void removerAutomacao(String idCasa, String email) {
-        listarAutomacoes(idCasa);
-        System.out.print("ID da automação a remover: ");
-        String id = sc.nextLine();
+        Casa casa = model.obterCasa(idCasa);
+        if (casa == null) { System.out.println("Casa não encontrada."); return; }
+        Map<String, Automacao> automacoes = casa.getAutomacoes();
+        if (automacoes.isEmpty()) { System.out.println("Sem automações definidas."); return; }
+        List<String> ids = new ArrayList<>(automacoes.keySet());
+        System.out.println("Automações:");
+        for (int i = 0; i < ids.size(); i++) {
+            System.out.println("  " + (i + 1) + ". " + automacoes.get(ids.get(i)));
+        }
+        System.out.print("Escolha (número): ");
+        int escolha;
+        try { escolha = Integer.parseInt(sc.nextLine()); }
+        catch (NumberFormatException e) { System.out.println("Opção inválida."); return; }
+        if (escolha < 1 || escolha > ids.size()) { System.out.println("Opção inválida."); return; }
         try {
-            Casa casa = model.obterCasa(idCasa);
-            Utilizador u = model.obterUtilizador(email);
-            casa.removerAutomacao(u, id);
-            System.out.println("Nota: a remoção via clone não persiste. Use o modelo directamente se necessário.");
+            model.removerAutomacaoCasa(idCasa, email, ids.get(escolha - 1));
+            System.out.println("Automação removida com sucesso.");
         } catch (Exception e) { System.out.println("Erro: " + e.getMessage()); }
     }
     private void menuEscalonamentos(String idCasa) {
@@ -489,20 +513,36 @@ public class TextUI {
         System.out.println("Cenário '" + nome + "' criado com " + cenario.getAcoes().size() + " ações.");
     }
     private void removerCenario() {
-        listarCenarios();
-        System.out.print("ID do cenário a remover: ");
-        String id = sc.nextLine();
-        model.removerCenario(id);
+        Map<String, Cenario> cenarios = model.obterCenarios();
+        if (cenarios.isEmpty()) { System.out.println("Sem cenários definidos."); return; }
+        List<String> ids = new ArrayList<>(cenarios.keySet());
+        System.out.println("Cenários:");
+        for (int i = 0; i < ids.size(); i++) {
+            System.out.println("  " + (i + 1) + ". " + cenarios.get(ids.get(i)));
+        }
+        System.out.print("Escolha (número): ");
+        int escolha;
+        try { escolha = Integer.parseInt(sc.nextLine()); }
+        catch (NumberFormatException e) { System.out.println("Opção inválida."); return; }
+        if (escolha < 1 || escolha > ids.size()) { System.out.println("Opção inválida."); return; }
+        model.removerCenario(ids.get(escolha - 1));
         System.out.println("Cenário removido.");
     }
     private void aplicarCenario(String idCasa) {
         Map<String, Cenario> cenarios = model.obterCenarios();
         if (cenarios.isEmpty()) { System.out.println("Sem cenários disponíveis."); return; }
-        for (Cenario c : cenarios.values()) System.out.println(c);
-        System.out.print("ID do cenário a aplicar: ");
-        String id = sc.nextLine();
+        List<String> ids = new ArrayList<>(cenarios.keySet());
+        System.out.println("Cenários disponíveis:");
+        for (int i = 0; i < ids.size(); i++) {
+            System.out.println("  " + (i + 1) + ". " + cenarios.get(ids.get(i)));
+        }
+        System.out.print("Escolha (número): ");
+        int escolha;
+        try { escolha = Integer.parseInt(sc.nextLine()); }
+        catch (NumberFormatException e) { System.out.println("Opção inválida."); return; }
+        if (escolha < 1 || escolha > ids.size()) { System.out.println("Opção inválida."); return; }
         try {
-            model.aplicarCenario(id, idCasa);
+            model.aplicarCenario(ids.get(escolha - 1), idCasa);
             System.out.println("Cenário aplicado com sucesso.");
         } catch (Exception e) { System.out.println("Erro: " + e.getMessage()); }
     }
