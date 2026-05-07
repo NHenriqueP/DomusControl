@@ -527,11 +527,43 @@ public class TextUI {
         List<Sugestao> sugestoes = model.gerarSugestoes();
         if (sugestoes.isEmpty()) {
             System.out.println("Sem sugestões no momento. Use mais o sistema para gerar dados.");
-        } else {
-            System.out.println("=== Sugestões Inteligentes (" + sugestoes.size() + ") ===");
-            for (int i = 0; i < sugestoes.size(); i++) {
-                System.out.println((i + 1) + ". " + sugestoes.get(i));
+            return;
+        }
+        System.out.println("=== Sugestões Inteligentes (" + sugestoes.size() + ") ===");
+        for (int i = 0; i < sugestoes.size(); i++) {
+            System.out.println((i + 1) + ". " + sugestoes.get(i));
+        }
+        System.out.println("\nDeseja aceitar alguma sugestão?");
+        System.out.print("Introduza o número da sugestão, 'todos' para aceitar todas, ou 'nao' para sair: ");
+        String resposta = sc.nextLine().trim();
+        if (resposta.equalsIgnoreCase("nao") || resposta.equalsIgnoreCase("não") || resposta.equals("0")) {
+            System.out.println("Nenhuma sugestão aceite.");
+            return;
+        }
+        if (resposta.equalsIgnoreCase("todos") || resposta.equalsIgnoreCase("all")) {
+            for (Sugestao s : sugestoes) {
+                try {
+                    String resultado = model.aceitarSugestao(s);
+                    System.out.println("  ✓ " + resultado);
+                } catch (Exception e) {
+                    System.out.println("  ✗ Erro: " + e.getMessage());
+                }
             }
+            System.out.println("Todas as sugestões foram processadas.");
+            return;
+        }
+        try {
+            int indice = Integer.parseInt(resposta);
+            if (indice < 1 || indice > sugestoes.size()) {
+                System.out.println("Número inválido.");
+                return;
+            }
+            String resultado = model.aceitarSugestao(sugestoes.get(indice - 1));
+            System.out.println("✓ " + resultado);
+        } catch (NumberFormatException e) {
+            System.out.println("Opção inválida.");
+        } catch (Exception e) {
+            System.out.println("Erro ao aceitar sugestão: " + e.getMessage());
         }
     }
     private void guardarEstado() {

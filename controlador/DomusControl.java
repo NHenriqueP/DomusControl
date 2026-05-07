@@ -528,6 +528,55 @@ public class DomusControl implements Serializable {
         sugestoes.sort((a, b) -> Integer.compare(b.getAtivacoes(), a.getAtivacoes()));
         return sugestoes;
     }
+    public String aceitarSugestao(Sugestao sugestao) {
+        String idCasa = sugestao.getIdCasa();
+        String idDisp = sugestao.getIdDispositivo();
+        String nomeDivisao = sugestao.getNomeDivisao();
+        String tipo = sugestao.getTipo();
+        Casa casa = obterCasaOuErro(idCasa);
+        if ("AUTOMACAO".equals(tipo)) {
+            Automacao automacao = new Automacao(
+                "Auto: " + idDisp,
+                sugestao.getDescricao(),
+                c -> {
+                    Dispositivo d = c.getDispositivos().get(idDisp);
+                    return d != null && !d.getEstado();
+                },
+                c -> c.ligarDispositivosDivisao(nomeDivisao)
+            );
+            Map<String, Automacao> automacoes = casa.getAutomacoes();
+            automacoes.put(automacao.getId(), automacao.clone());
+            casa.setAutomacoes(automacoes);
+            return "Automacao criada para " + idDisp + " na divisao " + nomeDivisao;
+        } else if ("ESCALONAMENTO".equals(tipo)) {
+            Escalonamento escalonamento = new Escalonamento(
+                "Esc: " + idDisp,
+                idCasa,
+                this.tempoAtual.plusHours(24),
+                c -> c.desligarDispositivosDivisao(nomeDivisao)
+            );
+            this.escalonamentos.add(escalonamento);
+            return "Escalonamento criado para desligar " + nomeDivisao + " daqui a 24h";
+        } else if ("EFICIENCIA".equals(tipo)) {
+            Automacao automacao = new Automacao(
+                "Eficiencia: " + idDisp,
+                sugestao.getDescricao(),
+                c -> {
+                    Dispositivo d = c.getDispositivos().get(idDisp);
+                    return d != null && d.getEstado();
+                },
+                c -> {
+                    Dispositivo d = c.getDispositivos().get(idDisp);
+                    if (d != null) d.desligarDispositivo();
+                }
+            );
+            Map<String, Automacao> automacoes = casa.getAutomacoes();
+            automacoes.put(automacao.getId(), automacao.clone());
+            casa.setAutomacoes(automacoes);
+            return "Automacao de eficiencia criada para desligar " + idDisp;
+        }
+        return "Tipo de sugestao desconhecido.";
+    }
     private String encontrarDivisaoDoDispositivo(Map<String, Divisao> divisoes, String idDispositivo) {
         for (Map.Entry<String, Divisao> entry : divisoes.entrySet()) {
             if (entry.getValue().getIdDispositivos().contains(idDispositivo)) {
