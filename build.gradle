@@ -12,24 +12,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs = ['.']
-            exclude 'testes/**'
-            exclude 'build/**'
-            exclude '.gradle/**'
-            exclude '.vscode/**'
-            exclude '.git/**'
-            exclude 'lib/**'
-        }
-    }
-    test {
-        java {
-            srcDirs = ['testes']
-        }
-    }
-}
+
 
 application {
     mainClass = 'UI.Main'
