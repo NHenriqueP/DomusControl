@@ -84,7 +84,10 @@ public class Casa implements Serializable {
                 ));
     }
     public void setDispositivos(Map<String, Dispositivo> dispositivos) {
-        this.dispositivos = new HashMap<>(dispositivos);
+        this.dispositivos = new HashMap<>();
+        for (Map.Entry<String, Dispositivo> entry : dispositivos.entrySet()) {
+            this.dispositivos.put(entry.getKey(), entry.getValue().clone());
+        }
     }
     public Map<String, Divisao> getDivisoes() {
         Map<String, Divisao> copia = new HashMap<>();
@@ -123,7 +126,7 @@ public class Casa implements Serializable {
         if (!this.divisoes.containsKey(nomeDivisao)) {
             addDivisao(nomeDivisao);
         }
-        this.dispositivos.put(d.getId(), d);
+        this.dispositivos.put(d.getId(), d.clone());
         this.divisoes.get(nomeDivisao).addDispositivo(d.getId());
     }
     public void addDispositivo(Utilizador utilizador, Dispositivo d, String nomeDivisao) {

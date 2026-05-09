@@ -19,9 +19,9 @@ public class ArCondicionado extends Dispositivo {
     public ArCondicionado(String id, String marca, String modelo, double consumoPorHora, boolean estado,
                           int velocidade, String modo, double temperatura) {
         super(id, marca, modelo, consumoPorHora, estado);
-        this.velocidade = isVelocidadeValida(velocidade) ? velocidade : 1;
-        this.modo = isModoValido(modo) ? modo : "AUTO";
-        this.temperatura = isTemperaturaValida(temperatura) ? temperatura : 24.0;
+        setVelocidade(velocidade);
+        setModo(modo);
+        setTemperatura(temperatura);
     }
 
     public ArCondicionado(ArCondicionado a) {
@@ -36,9 +36,10 @@ public class ArCondicionado extends Dispositivo {
     }
 
     public void setVelocidade(int velocidade) {
-        if (isVelocidadeValida(velocidade)) {
-            this.velocidade = velocidade;
+        if (!isVelocidadeValida(velocidade)) {
+            throw new IllegalArgumentException("Velocidade invalida. Use um valor entre 1 e 5.");
         }
+        this.velocidade = velocidade;
     }
 
     public String getModo() {
@@ -46,9 +47,10 @@ public class ArCondicionado extends Dispositivo {
     }
 
     public void setModo(String modo) {
-        if (isModoValido(modo)) {
-            this.modo = modo;
+        if (!isModoValido(modo)) {
+            throw new IllegalArgumentException("Modo invalido. Use FRIO, QUENTE, VENTOINHA ou AUTO.");
         }
+        this.modo = modo;
     }
 
     public double getTemperatura() {
@@ -56,9 +58,10 @@ public class ArCondicionado extends Dispositivo {
     }
 
     public void setTemperatura(double temperatura) {
-        if (isTemperaturaValida(temperatura)) {
-            this.temperatura = temperatura;
+        if (!isTemperaturaValida(temperatura)) {
+            throw new IllegalArgumentException("Temperatura invalida. Use um valor entre 16.0 e 30.0.");
         }
+        this.temperatura = temperatura;
     }
 
     private boolean isVelocidadeValida(int velocidade) {

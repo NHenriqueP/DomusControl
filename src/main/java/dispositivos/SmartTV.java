@@ -19,9 +19,9 @@ public class SmartTV extends Dispositivo {
     public SmartTV(String id, String marca, String modelo, double consumoPorHora, boolean estado,
                    int volume, int canalAtual, String fonteEntrada) {
         super(id, marca, modelo, consumoPorHora, estado);
-        this.volume = isVolumeValido(volume) ? volume : 10;
-        this.canalAtual = isCanalValido(canalAtual) ? canalAtual : 1;
-        this.fonteEntrada = isFonteValida(fonteEntrada) ? fonteEntrada : "ANTENA";
+        setVolume(volume);
+        setCanalAtual(canalAtual);
+        setFonteEntrada(fonteEntrada);
     }
 
     public SmartTV(SmartTV s) {
@@ -36,9 +36,10 @@ public class SmartTV extends Dispositivo {
     }
 
     public void setVolume(int volume) {
-        if (isVolumeValido(volume)) {
-            this.volume = volume;
+        if (!isVolumeValido(volume)) {
+            throw new IllegalArgumentException("Volume invalido. Use um valor entre 0 e 100.");
         }
+        this.volume = volume;
     }
 
     public int getCanalAtual() {
@@ -46,9 +47,10 @@ public class SmartTV extends Dispositivo {
     }
 
     public void setCanalAtual(int canalAtual) {
-        if (isCanalValido(canalAtual)) {
-            this.canalAtual = canalAtual;
+        if (!isCanalValido(canalAtual)) {
+            throw new IllegalArgumentException("Canal invalido. Use um valor maior que 0.");
         }
+        this.canalAtual = canalAtual;
     }
 
     public String getFonteEntrada() {
@@ -56,9 +58,10 @@ public class SmartTV extends Dispositivo {
     }
 
     public void setFonteEntrada(String fonteEntrada) {
-        if (isFonteValida(fonteEntrada)) {
-            this.fonteEntrada = fonteEntrada;
+        if (!isFonteValida(fonteEntrada)) {
+            throw new IllegalArgumentException("Fonte invalida. Use HDMI-1, HDMI-2, ANTENA ou CABO.");
         }
+        this.fonteEntrada = fonteEntrada;
     }
 
     private boolean isVolumeValido(int volume) {

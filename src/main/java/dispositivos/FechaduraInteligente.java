@@ -18,7 +18,7 @@ public class FechaduraInteligente extends Dispositivo {
                                 boolean estadoTranca, String codigoAcesso) {
         super(id, marca, modelo, consumoPorHora, estado);
         this.estadoTranca = estadoTranca;
-        this.codigoAcesso = isCodigoValido(codigoAcesso) ? codigoAcesso : "0000";
+        setCodigoAcesso(codigoAcesso);
     }
 
     public FechaduraInteligente(FechaduraInteligente f) {
@@ -40,9 +40,10 @@ public class FechaduraInteligente extends Dispositivo {
     }
 
     public void setCodigoAcesso(String codigoAcesso) {
-        if (isCodigoValido(codigoAcesso)) {
-            this.codigoAcesso = codigoAcesso;
+        if (!isCodigoValido(codigoAcesso)) {
+            throw new IllegalArgumentException("Codigo de acesso invalido. Use apenas digitos.");
         }
+        this.codigoAcesso = codigoAcesso;
     }
 
     public boolean alterarCodigo(String codigoAtual, String novoCodigo) {
@@ -82,7 +83,7 @@ public class FechaduraInteligente extends Dispositivo {
         StringBuilder sb = new StringBuilder();
         sb.append(super.toString());
         sb.append(" | FechaduraInteligente [Estado Tranca= ").append(this.estadoTranca ? "Trancada" : "Destrancada");
-        sb.append(", Codigo Acesso= ").append(this.codigoAcesso);
+        sb.append(", Codigo Acesso= ").append("*".repeat(this.codigoAcesso.length()));
         sb.append("]");
         return sb.toString();
     }

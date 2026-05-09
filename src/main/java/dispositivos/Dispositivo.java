@@ -16,12 +16,21 @@ public abstract class Dispositivo implements Serializable {
         this.estado = estado;
     }
     public void setMarca(String marca) {
+        if (marca == null) {
+            throw new IllegalArgumentException("Marca nao pode ser null.");
+        }
         this.marca = marca;
     }
     public void setModelo(String modelo) {
+        if (modelo == null) {
+            throw new IllegalArgumentException("Modelo nao pode ser null.");
+        }
         this.modelo = modelo;
     }
     public void setConsumoPorHora(double consumoPorHora) {
+        if (consumoPorHora < 0) {
+            throw new IllegalArgumentException("Consumo por hora nao pode ser negativo.");
+        }
         this.consumoPorHora = consumoPorHora;
     }
     public void setEstado(boolean estado) {

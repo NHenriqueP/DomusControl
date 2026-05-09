@@ -19,9 +19,9 @@ public class SistemaDeRega extends Dispositivo {
     public SistemaDeRega(String id, String marca, String modelo, double consumoPorHora, boolean estado,
                          int percentagemIrrigacao, int duracao, String zona) {
         super(id, marca, modelo, consumoPorHora, estado);
-        this.percentagemIrrigacao = isPercentagemValida(percentagemIrrigacao) ? percentagemIrrigacao : 0;
-        this.duracao = isDuracaoValida(duracao) ? duracao : 1;
-        this.zona = zona != null ? zona : "";
+        setPercentagemIrrigacao(percentagemIrrigacao);
+        setDuracao(duracao);
+        setZona(zona);
     }
 
     public SistemaDeRega(SistemaDeRega s) {
@@ -36,9 +36,10 @@ public class SistemaDeRega extends Dispositivo {
     }
 
     public void setPercentagemIrrigacao(int percentagemIrrigacao) {
-        if (isPercentagemValida(percentagemIrrigacao)) {
-            this.percentagemIrrigacao = percentagemIrrigacao;
+        if (!isPercentagemValida(percentagemIrrigacao)) {
+            throw new IllegalArgumentException("Percentagem de irrigacao invalida. Use um valor entre 0 e 100.");
         }
+        this.percentagemIrrigacao = percentagemIrrigacao;
     }
 
     public int getDuracao() {
@@ -46,9 +47,10 @@ public class SistemaDeRega extends Dispositivo {
     }
 
     public void setDuracao(int duracao) {
-        if (isDuracaoValida(duracao)) {
-            this.duracao = duracao;
+        if (!isDuracaoValida(duracao)) {
+            throw new IllegalArgumentException("Duracao invalida. Use um valor maior que 0.");
         }
+        this.duracao = duracao;
     }
 
     public String getZona() {
@@ -56,9 +58,10 @@ public class SistemaDeRega extends Dispositivo {
     }
 
     public void setZona(String zona) {
-        if (zona != null) {
-            this.zona = zona;
+        if (zona == null) {
+            throw new IllegalArgumentException("Zona nao pode ser null.");
         }
+        this.zona = zona;
     }
 
     private boolean isPercentagemValida(int percentagemIrrigacao) {

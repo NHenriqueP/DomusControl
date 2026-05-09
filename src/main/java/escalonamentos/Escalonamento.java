@@ -18,7 +18,7 @@ public class Escalonamento implements Serializable {
         this.nome = "";
         this.idCasa = "";
         this.instanteExecucao = LocalDateTime.now();
-        this.acao = null;
+        this.acao = casa -> {};
         this.executado = false;
     }
     public Escalonamento(String nome, String idCasa, LocalDateTime instanteExecucao, AcaoAutomacao acao) {

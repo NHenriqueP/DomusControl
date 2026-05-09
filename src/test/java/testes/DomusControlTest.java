@@ -304,13 +304,13 @@ public class DomusControlTest {
     public void testArCondicionadoValidacoes() {
         ArCondicionado ac = new ArCondicionado("AC1", "LG", "X", 1.0, false, 3, "FRIO", 22.0);
 
-        ac.setVelocidade(0);
+        assertThrows(IllegalArgumentException.class, () -> ac.setVelocidade(0));
         assertEquals(3, ac.getVelocidade());
 
-        ac.setModo("INVALIDO");
+        assertThrows(IllegalArgumentException.class, () -> ac.setModo("INVALIDO"));
         assertEquals("FRIO", ac.getModo());
 
-        ac.setTemperatura(40.0);
+        assertThrows(IllegalArgumentException.class, () -> ac.setTemperatura(40.0));
         assertEquals(22.0, ac.getTemperatura(), 0.01);
     }
 
@@ -318,13 +318,13 @@ public class DomusControlTest {
     public void testSistemaDeRegaValidacoes() {
         SistemaDeRega sr = new SistemaDeRega("SR1", "Rain", "Pro", 2.0, false, 50, 10, "Relvado");
 
-        sr.setPercentagemIrrigacao(200);
+        assertThrows(IllegalArgumentException.class, () -> sr.setPercentagemIrrigacao(200));
         assertEquals(50, sr.getPercentagemIrrigacao());
 
-        sr.setDuracao(0);
+        assertThrows(IllegalArgumentException.class, () -> sr.setDuracao(0));
         assertEquals(10, sr.getDuracao());
 
-        sr.setZona(null);
+        assertThrows(IllegalArgumentException.class, () -> sr.setZona(null));
         assertEquals("Relvado", sr.getZona());
     }
 
@@ -332,13 +332,13 @@ public class DomusControlTest {
     public void testSmartTVValidacoes() {
         SmartTV tv = new SmartTV("TV1", "Sony", "Bravia", 3.0, false, 20, 3, "HDMI-1");
 
-        tv.setVolume(-1);
+        assertThrows(IllegalArgumentException.class, () -> tv.setVolume(-1));
         assertEquals(20, tv.getVolume());
 
-        tv.setCanalAtual(0);
+        assertThrows(IllegalArgumentException.class, () -> tv.setCanalAtual(0));
         assertEquals(3, tv.getCanalAtual());
 
-        tv.setFonteEntrada("USB");
+        assertThrows(IllegalArgumentException.class, () -> tv.setFonteEntrada("USB"));
         assertEquals("HDMI-1", tv.getFonteEntrada());
     }
 
