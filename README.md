@@ -20,6 +20,52 @@ Ao iniciar, o menu principal inclui as seguintes areas:
 - Gravar Estado
 - Carregar Estado
 
+Dentro de cada menu temos varias opções, ex: 
+
+**Gestão de Utilizadores**
+1. Adicionar Utilizador
+2. Listar Utilizadores
+3. Remover Utilizador
+4. Atualizar Utilizador
+5. Gerir Utilizador
+6. Sair
+
+**Gestão de Casas**
+1. Adicionar Casa
+2. Listar Casas
+3. Remover Casa
+4. Atualizar Casa
+5. Gerir Casa Específica
+6. Sair
+
+**Cenários**
+1. Listar Cenários
+2. Criar Cenário Personalizado
+3. Remover Cenário
+4. Sair
+
+**Avançar no Tempo**
+1. Avançar X horas
+2. Avançar até instante específico
+3. Sair
+
+**Estatísticas**
+1. Estatísticas do Sistema
+2. Estatísticas da Casa
+3. Sair
+
+**Sugestões Inteligentes**
+1. Sugestões Automáticas
+2. Sair
+
+**Gravar Estado**
+1. Gravar Estado
+2. Sair
+
+**Carregar Estado**
+1. Carregar Estado
+2. Sair
+
 
 ## Persistencia de estado
 
