@@ -5,6 +5,27 @@ Rafael Figueiras Esteves - A112032 - Rafabass1
 Nuno Henrique Dias Pereira - A110067 - NHenriqueP
 
 
+## Como executar
+
+O ponto de entrada da aplicacao e `UI.Main`, e o programa corre em modo interativo no terminal.
+
+Ao iniciar, o menu principal inclui as seguintes areas:
+
+- Gestão de Utilizadores
+- Gestão de Casas
+- Cenários
+- Avançar no Tempo
+- Estatísticas
+- Sugestões Inteligentes
+- Gravar Estado
+- Carregar Estado
+
+
+## Persistencia de estado
+
+O estado da aplicacao pode ser gravado e carregado a partir do ficheiro `estado_domus.bin` no diretorio do projeto.
+
+
 ### Utilizando Gradle
 
 Alternativamente, se tiver o Gradle instalado, pode gerir o projeto com os seguintes comandos:
